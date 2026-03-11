@@ -530,6 +530,11 @@
     <div id="tasks-list"></div>
   </div>
 
+  <!-- VERSION TAG -->
+  <div style="text-align:center;padding:14px 0 20px;font-size:10px;color:rgba(158,122,90,0.35);letter-spacing:2px;font-family:'Nunito',sans-serif;user-select:none;">
+    ДОНЕРНАЯ АХМЕДА · v1.2
+  </div>
+
 </div>
 <div class="toast" id="toast"></div>
 
@@ -545,7 +550,7 @@ const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ═══════════════════════════════════════
-//   TELEGRAM INIT
+//   TELEGRAM INIT  (v1.2)
 // ═══════════════════════════════════════
 const tg = window.Telegram?.WebApp;
 if (tg) {
@@ -555,33 +560,68 @@ if (tg) {
   tg.setBackgroundColor('#180d06');
 }
 
-const tgUser = tg?.initDataUnsafe?.user;
-
-// Стабильный ID: реальный Telegram ID, или постоянный device ID из localStorage
-function getStableDeviceId() {
-  const KEY = '_doner_device_id';
-  let id = localStorage.getItem(KEY);
-  if (!id) {
-    id = 'device_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-    localStorage.setItem(KEY, id);
+// Метод 1: initDataUnsafe.user (стандарт)
+// Метод 2: ручной парсинг initData (некоторые версии Telegram не заполняют initDataUnsafe)
+function getTgUser() {
+  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+    return tg.initDataUnsafe.user;
   }
+  try {
+    var raw = tg && tg.initData;
+    if (raw && raw.length > 0) {
+      var params = new URLSearchParams(raw);
+      var userStr = params.get('user');
+      if (userStr) return JSON.parse(userStr);
+    }
+  } catch(e) { console.warn('initData parse error:', e); }
+  return null;
+}
+
+// Стабильный ID без Telegram: сохраняем в localStorage + cookie,
+// потому что Telegram WebView может очищать localStorage
+function getStableDeviceId() {
+  var KEY = '_doner_uid';
+  var id = null;
+  try { id = localStorage.getItem(KEY); } catch(e) {}
+  if (!id) {
+    try {
+      var rx = new RegExp('(?:^|; )' + KEY + '=([^;]+)');
+      var m = document.cookie.match(rx);
+      if (m) id = m[1];
+    } catch(e) {}
+  }
+  if (!id) {
+    id = 'dev_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+  }
+  try { localStorage.setItem(KEY, id); } catch(e) {}
+  try { document.cookie = KEY + '=' + id + ';max-age=31536000;path=/;SameSite=Lax'; } catch(e) {}
   return id;
 }
-const userId = String(tgUser?.id || getStableDeviceId());
 
-// Ник: приоритет @username, потом имя+фамилия, потом заглушка
+const tgUser  = getTgUser();
+const userId  = tgUser ? String(tgUser.id) : getStableDeviceId();
+
+// Ник: @username → Имя Фамилия → Гость Ахмеда
 const userName = tgUser
   ? (tgUser.username
       ? '@' + tgUser.username
-      : (tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '')))
+      : (tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '')).trim())
   : 'Гость Ахмеда';
 
-// Для аватарки: берём буквы без символа @
-const avatarSource = tgUser?.username || tgUser?.first_name || 'GA';
-const initials = avatarSource.replace('@','').split(/[\s_]/).map(w=>w[0]||'').join('').toUpperCase().substr(0,2) || '??';
+// Аватарка: первые буквы
+const avatarSource = ((tgUser && (tgUser.username || tgUser.first_name)) || 'GA').replace('@','');
+const initials = avatarSource.split(/[\s_]/).map(function(w){return w[0]||'';}).join('').toUpperCase().substr(0,2) || '??';
 
 document.getElementById('username').textContent = userName;
 document.getElementById('avatar').textContent   = initials;
+
+// Диагностика (можно убрать позже)
+console.log('Auth debug:', {
+  userId: userId,
+  userName: userName,
+  hasTg: !!tgUser,
+  initDataLen: (tg && tg.initData && tg.initData.length) || 0
+});
 
 // ═══════════════════════════════════════
 //   SYNC STATUS DOT
