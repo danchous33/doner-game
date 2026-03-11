@@ -7,22 +7,352 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ----------------- Стили (оставлены почти без изменений, оптимизированы) ----------------- */
-:root {
-  --bg: #180d06; --surface: #261408; --surface2: #321b0c; --ember: #ff4d00;
-  --saffron: #f5b82e; --gold: #ffe082; --sauce: #c0392b; --green: #7cb342;
-  --cream: #fdf3e3; --muted: #9e7a5a; --text: #fdf3e3; --glow-gold: 0 0 20px rgba(245,184,46,0.5);
-}
-body { background:var(--bg); color:var(--text); font-family:'Nunito',sans-serif; min-height:100vh; overflow-x:hidden; user-select:none; }
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-.app { position:relative; z-index:1; max-width:420px; margin:0 auto; }
+  :root {
+    --bg:       #180d06;
+    --surface:  #261408;
+    --surface2: #321b0c;
+    --ember:    #ff4d00;
+    --saffron:  #f5b82e;
+    --gold:     #ffe082;
+    --sauce:    #c0392b;
+    --green:    #7cb342;
+    --cream:    #fdf3e3;
+    --muted:    #9e7a5a;
+    --text:     #fdf3e3;
+    --glow-gold: 0 0 20px rgba(245,184,46,0.5);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'Nunito',sans-serif; min-height:100vh;
+    overflow-x:hidden; user-select:none;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse at 20% 0%,   rgba(255,80,0,0.12) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 60%,  rgba(245,184,46,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(180,40,0,0.1)   0%, transparent 50%);
+    pointer-events:none; z-index:0;
+  }
+  body::after {
+    content:''; position:fixed; inset:0;
+    background-image:radial-gradient(circle, rgba(245,184,46,0.06) 1px, transparent 1px);
+    background-size:28px 28px; pointer-events:none; z-index:0;
+  }
+  .app { position:relative; z-index:1; max-width:420px; margin:0 auto; }
 
-/* ... здесь вставляем все остальные стили из твоего оригинала ... */
+  /* LOADING SCREEN */
+  .loading-screen {
+    position:fixed; inset:0; background:var(--bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index:1000; gap:16px;
+  }
+  .loading-screen.hidden { display:none; }
+  .loading-doner { font-size:64px; animation:spin 1.2s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text {
+    font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:3px;
+    color:var(--saffron);
+  }
+  .loading-sub { font-size:12px; color:var(--muted); font-weight:600; }
 
-/* Float + Particles */
-.float-num { position:fixed; font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--gold); pointer-events:none; z-index:999; text-shadow:0 0 12px rgba(255,200,50,0.8); animation:float-up 0.85s ease forwards; }
-.float-num.crit { font-size:30px; color:var(--ember); text-shadow:0 0 16px rgba(255,80,0,0.9); }
-@keyframes float-up { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-90px) scale(0.6)} }
+  /* HEADER */
+  .header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px 10px;
+    border-bottom:1px solid rgba(245,184,46,0.12);
+  }
+  .shop-brand { display:flex; align-items:center; gap:10px; }
+  .shop-logo {
+    width:40px; height:40px; border-radius:10px;
+    background:linear-gradient(135deg,var(--ember),#c0392b);
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; box-shadow:0 3px 12px rgba(255,80,0,0.4); flex-shrink:0;
+  }
+  .shop-title {
+    font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px;
+    color:var(--saffron); text-shadow:0 0 16px rgba(245,184,46,0.5); line-height:1;
+  }
+  .shop-sub { font-size:11px; color:var(--muted); margin-top:2px; font-weight:600; }
+  .chef-badge {
+    background:linear-gradient(135deg,rgba(245,184,46,0.18),rgba(245,184,46,0.06));
+    border:1px solid rgba(245,184,46,0.4); border-radius:20px; padding:5px 12px;
+    font-family:'Bebas Neue',sans-serif; font-size:13px; color:var(--saffron); letter-spacing:1.5px;
+  }
+
+  /* USER ROW */
+  .user-row {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 16px 8px;
+    background:rgba(245,184,46,0.04);
+    border-bottom:1px solid rgba(245,184,46,0.08);
+  }
+  .user-avatar {
+    width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(135deg,var(--saffron),var(--ember));
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:13px; color:var(--bg);
+    border:2px solid rgba(245,184,46,0.3); flex-shrink:0; overflow:hidden;
+  }
+  .user-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+  .user-info { flex:1; }
+  .user-display-name { color:var(--text); font-size:15px; font-weight:800; display:block; }
+  .user-tg-handle { color:var(--muted); font-size:12px; font-weight:600; }
+  .user-rank-pill {
+    font-size:11px; color:var(--ember); font-weight:700;
+    background:rgba(255,77,0,0.12); border:1px solid rgba(255,77,0,0.3);
+    border-radius:12px; padding:3px 9px; white-space:nowrap;
+  }
+
+  /* STATS */
+  .stats-row { display:flex; gap:8px; padding:12px 16px 8px; }
+  .stat-card {
+    flex:1; background:var(--surface); border:1px solid rgba(245,184,46,0.1);
+    border-radius:14px; padding:10px; position:relative; overflow:hidden; text-align:center;
+  }
+  .stat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,transparent,var(--saffron),transparent); opacity:0.4;
+  }
+  .stat-emoji { font-size:18px; line-height:1; margin-bottom:3px; display:block; }
+  .stat-label { font-size:9px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; font-weight:700; }
+  .stat-value {
+    font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--gold);
+    margin-top:2px; letter-spacing:1px; text-shadow:0 0 10px rgba(255,224,130,0.4);
+  }
+  .stat-value.orange { color:var(--ember); text-shadow:0 0 10px rgba(255,77,0,0.4); }
+
+  /* RANK BAR */
+  .rank-section { padding:0 16px 14px; }
+  .rank-header { display:flex; justify-content:space-between; margin-bottom:6px; }
+  .rank-left { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-weight:700; }
+  .rank-right { font-size:12px; color:var(--saffron); font-weight:800; }
+  .progress-bar { height:7px; background:var(--surface2); border-radius:4px; overflow:hidden; }
+  .progress-fill {
+    height:100%; border-radius:4px;
+    background:linear-gradient(90deg,var(--ember),var(--saffron));
+    box-shadow:0 0 10px rgba(255,100,0,0.6);
+    transition:width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  /* CLICKER */
+  .clicker-zone {
+    display:flex; flex-direction:column; align-items:center;
+    padding:8px 16px 14px; position:relative;
+  }
+  .hunger-bar-wrap { width:100%; margin-bottom:14px; }
+  .hunger-label { display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; font-weight:700; }
+  .hunger-label span:first-child { color:var(--muted); }
+  .hunger-label span:last-child { color:var(--saffron); }
+  .hunger-bar { height:9px; background:var(--surface2); border-radius:5px; overflow:hidden; }
+  .hunger-fill {
+    height:100%; border-radius:5px;
+    background:linear-gradient(90deg,var(--sauce),var(--ember),var(--saffron));
+    box-shadow:0 0 12px rgba(255,77,0,0.5); transition:width 0.3s ease;
+  }
+
+  .doner-wrap { position:relative; margin:4px 0; }
+  .fire-glow {
+    position:absolute; inset:-30px; border-radius:50%;
+    background:radial-gradient(circle,rgba(255,100,0,0.2) 0%,rgba(255,50,0,0.08) 40%,transparent 70%);
+    animation:fire-pulse 1.5s ease-in-out infinite; pointer-events:none;
+  }
+  @keyframes fire-pulse { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.12);opacity:1} }
+
+  .doner-btn {
+    width:230px; height:230px; border-radius:50%;
+    background:
+      radial-gradient(circle at 38% 38%,rgba(255,200,100,0.18) 0%,transparent 55%),
+      conic-gradient(from 0deg,#3d1a08,#5c2a0e,#7a3a14,#5c2a0e,#3d1a08);
+    border:3px solid rgba(245,184,46,0.45);
+    cursor:pointer; position:relative; overflow:hidden;
+    box-shadow:0 0 40px rgba(255,100,0,0.35),0 0 80px rgba(255,100,0,0.12),inset 0 0 30px rgba(255,150,50,0.1);
+    transition:transform 0.08s ease,box-shadow 0.08s ease;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    touch-action:manipulation;
+  }
+  .doner-btn:active {
+    transform:scale(0.92);
+    box-shadow:0 0 60px rgba(255,130,0,0.7),inset 0 0 40px rgba(255,150,50,0.25);
+  }
+  .doner-icon {
+    font-size:82px; line-height:1;
+    filter:drop-shadow(0 0 14px rgba(255,180,50,0.7));
+    animation:doner-sway 3s ease-in-out infinite; pointer-events:none;
+  }
+  @keyframes doner-sway { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(4deg)} }
+  .doner-tap-text {
+    font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:3px;
+    color:var(--saffron); opacity:0.75; pointer-events:none;
+  }
+
+  .float-num {
+    position:fixed; font-family:'Bebas Neue',sans-serif;
+    font-size:24px; color:var(--gold); pointer-events:none; z-index:999;
+    text-shadow:0 0 12px rgba(255,200,50,0.8); letter-spacing:1px;
+    animation:float-up 0.85s ease forwards;
+  }
+  .float-num.crit { font-size:30px; color:var(--ember); text-shadow:0 0 16px rgba(255,80,0,0.9); }
+  @keyframes float-up { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-90px) scale(0.6)} }
+
+  .combo-display {
+    font-family:'Bebas Neue',sans-serif; font-size:14px; color:var(--ember);
+    letter-spacing:3px; margin-top:6px; min-height:20px; text-align:center;
+    text-shadow:0 0 12px rgba(255,80,0,0.7);
+  }
+
+  /* TABS */
+  .tabs {
+    display:flex; border-top:2px solid rgba(245,184,46,0.15);
+    border-bottom:1px solid rgba(245,184,46,0.08);
+    background:var(--surface); position:sticky; top:0; z-index:10;
+  }
+  .tab {
+    flex:1; padding:11px 0; text-align:center; cursor:pointer;
+    font-size:10px; text-transform:uppercase; letter-spacing:1px; font-weight:800;
+    color:var(--muted); border-bottom:3px solid transparent; transition:all 0.2s;
+  }
+  .tab.active { color:var(--saffron); border-bottom-color:var(--ember); background:rgba(245,184,46,0.05); }
+  .tab-icon { font-size:17px; display:block; margin-bottom:2px; }
+
+  .panel { display:none; padding:16px; }
+  .panel.active { display:block; }
+  .section-title {
+    font-family:'Bebas Neue',sans-serif; font-size:16px; color:var(--muted);
+    letter-spacing:3px; text-transform:uppercase; margin-bottom:14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,rgba(245,184,46,0.4),transparent); }
+
+  /* UPGRADES */
+  .upgrade-grid { display:flex; flex-direction:column; gap:10px; }
+  .upgrade-card {
+    background:var(--surface); border:1px solid rgba(245,184,46,0.1);
+    border-radius:16px; padding:14px 16px;
+    display:flex; align-items:center; gap:14px;
+    cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden;
+  }
+  .upgrade-card::before {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:transparent; border-radius:3px 0 0 3px; transition:background 0.2s;
+  }
+  .upgrade-card.affordable { border-color:rgba(245,184,46,0.35); }
+  .upgrade-card.affordable::before { background:linear-gradient(180deg,var(--saffron),var(--ember)); }
+  .upgrade-card.affordable:active { transform:scale(0.98); background:rgba(245,184,46,0.04); }
+  .upgrade-card.maxed { border-color:rgba(124,179,66,0.4); }
+  .upgrade-card.maxed::before { background:var(--green); }
+  .upgrade-card.cant-afford { opacity:0.45; cursor:not-allowed; }
+  .upgrade-icon { font-size:34px; flex-shrink:0; }
+  .upgrade-info { flex:1; }
+  .upgrade-name { font-weight:800; font-size:15px; margin-bottom:2px; color:var(--cream); }
+  .upgrade-desc { font-size:12px; color:var(--muted); font-weight:600; }
+  .upgrade-level { font-size:11px; color:var(--saffron); margin-top:3px; font-weight:700; }
+  .upgrade-cost { font-family:'Bebas Neue',sans-serif; font-size:16px; color:var(--gold); text-align:right; flex-shrink:0; letter-spacing:1px; }
+  .upgrade-cost small { display:block; font-size:10px; color:var(--muted); font-family:'Nunito'; font-weight:700; }
+  .upgrade-cost.maxed-label { color:var(--green); font-size:13px; }
+
+  /* LEADERBOARD */
+  .leaderboard { display:flex; flex-direction:column; gap:8px; }
+  .lb-loading { text-align:center; padding:30px; font-size:13px; color:var(--muted); font-weight:700; }
+  .lb-loading-spinner { font-size:30px; display:block; margin-bottom:10px; animation:spin 1s linear infinite; }
+
+  .leader-item {
+    background:var(--surface); border:1px solid rgba(245,184,46,0.08);
+    border-radius:14px; padding:11px 14px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .leader-item.me   { border-color:rgba(245,184,46,0.45); background:rgba(245,184,46,0.05); }
+  .leader-item.top1 { border-color:rgba(255,215,0,0.5);   background:rgba(255,215,0,0.04);  }
+  .leader-item.top2 { border-color:rgba(192,192,192,0.35); }
+  .leader-item.top3 { border-color:rgba(205,127,50,0.35); }
+
+  .leader-rank { font-family:'Bebas Neue',sans-serif; font-size:20px; width:30px; text-align:center; flex-shrink:0; }
+  .rank-1 { color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.6); }
+  .rank-2 { color:#c0c0c0; }
+  .rank-3 { color:#cd7f32; }
+  .rank-other { color:var(--muted); font-size:14px; }
+
+  .leader-avatar {
+    width:38px; height:38px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,var(--saffron),var(--ember));
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:14px; color:var(--bg); overflow:hidden;
+  }
+  .leader-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+  .leader-name { flex:1; }
+  .leader-name strong { display:block; font-size:14px; font-weight:800; color:var(--cream); }
+  .leader-name span   { font-size:11px; color:var(--muted); font-weight:600; }
+  .leader-score { font-family:'Bebas Neue',sans-serif; font-size:15px; color:var(--gold); text-align:right; letter-spacing:1px; }
+  .leader-score small { display:block; font-size:10px; color:var(--muted); font-family:'Nunito'; font-weight:700; }
+
+  .refresh-btn {
+    width:100%; margin-top:12px; padding:12px;
+    background:transparent; border:1px solid rgba(245,184,46,0.25);
+    border-radius:14px; color:var(--saffron);
+    font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:2px; cursor:pointer;
+  }
+  .refresh-btn:active { background:rgba(245,184,46,0.08); }
+
+  /* TASKS */
+  .challenge-card {
+    background:var(--surface); border:1px solid rgba(255,77,0,0.2);
+    border-radius:16px; padding:14px 16px; margin-bottom:10px; position:relative; overflow:hidden;
+  }
+  .challenge-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .challenge-name { font-weight:800; font-size:15px; color:var(--cream); }
+  .challenge-reward { color:var(--gold); font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:1px; }
+  .challenge-progress { font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:700; }
+  .ch-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; }
+  .ch-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--sauce),var(--ember),var(--saffron)); transition:width 0.5s ease; }
+  .task-done-stamp { position:absolute; top:10px; right:10px; font-size:22px; }
+
+  /* DAILY */
+  .daily-banner {
+    margin:0 16px 12px;
+    background:linear-gradient(135deg,rgba(255,77,0,0.15),rgba(245,184,46,0.1));
+    border:1px solid rgba(245,184,46,0.3); border-radius:16px; padding:12px 16px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .daily-banner-icon { font-size:32px; }
+  .daily-banner-text { flex:1; }
+  .daily-banner-title { font-weight:800; font-size:14px; color:var(--cream); }
+  .daily-banner-sub { font-size:11px; color:var(--muted); font-weight:600; margin-top:1px; }
+  .daily-btn {
+    background:linear-gradient(135deg,var(--ember),var(--saffron));
+    border:none; border-radius:10px; padding:8px 14px;
+    font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:1px;
+    color:var(--bg); cursor:pointer; flex-shrink:0;
+    box-shadow:0 4px 14px rgba(255,100,0,0.4); transition:transform 0.1s;
+  }
+  .daily-btn:active { transform:scale(0.95); }
+
+  /* SYNC STATUS */
+  .sync-dot {
+    width:7px; height:7px; border-radius:50%; background:var(--green);
+    display:inline-block; margin-right:5px;
+    box-shadow:0 0 6px var(--green);
+  }
+  .sync-dot.syncing { background:var(--saffron); box-shadow:0 0 6px var(--saffron); animation:blink 0.8s ease infinite; }
+  .sync-dot.error   { background:var(--sauce);   box-shadow:0 0 6px var(--sauce); }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .sync-label { font-size:10px; color:var(--muted); font-weight:700; }
+
+  .toast {
+    position:fixed; top:20px; left:50%;
+    transform:translateX(-50%) translateY(-90px);
+    background:var(--surface2); border:1px solid rgba(245,184,46,0.45);
+    border-radius:14px; padding:10px 20px;
+    font-size:13px; font-weight:800; color:var(--saffron);
+    z-index:9999; transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    white-space:nowrap; box-shadow:var(--glow-gold);
+  }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  @keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-4deg)} 75%{transform:rotate(4deg)} }
+  .shake { animation:shake 0.2s ease; }
+
+  .particles-canvas { position:fixed; inset:0; pointer-events:none; z-index:998; }
 </style>
 </head>
 <body>
@@ -36,113 +366,607 @@ body { background:var(--bg); color:var(--text); font-family:'Nunito',sans-serif;
 
 <canvas class="particles-canvas" id="canvas"></canvas>
 <div class="app">
-  <!-- HEADER, USER ROW, STATS, RANK, CLICKER, TABS -->
-  <!-- (оставляем HTML полностью как в твоем коде) -->
-</div>
 
+  <div class="header">
+    <div class="shop-brand">
+      <div class="shop-logo">🥙</div>
+      <div>
+        <div class="shop-title">ДОНЕРНАЯ АХМЕДА</div>
+        <div class="shop-sub">TAP &amp; EAT SINCE 1994</div>
+      </div>
+    </div>
+    <div class="chef-badge">ШЕФ <span id="level-num">1</span></div>
+  </div>
+
+  <div class="user-row">
+    <div class="user-avatar" id="avatar">?</div>
+    <div class="user-info">
+      <span class="user-display-name" id="display-name">Загрузка...</span>
+      <span class="user-tg-handle" id="tg-handle"></span>
+    </div>
+    <div class="user-rank-pill" id="rank-pill">Новичок</div>
+  </div>
+
+  <div style="display:flex;align-items:center;padding:6px 16px 2px;">
+    <span class="sync-dot" id="sync-dot"></span>
+    <span class="sync-label" id="sync-label">Облако подключено</span>
+  </div>
+
+  <div class="daily-banner" id="daily-banner">
+    <div class="daily-banner-icon">🎁</div>
+    <div class="daily-banner-text">
+      <div class="daily-banner-title">Ежедневный донер!</div>
+      <div class="daily-banner-sub">Заходи каждый день за бонусом</div>
+    </div>
+    <button class="daily-btn" onclick="claimDaily()">ЗАБРАТЬ</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-emoji">💵</span>
+      <div class="stat-label">Лиры</div>
+      <div class="stat-value" id="coins-display">0</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-emoji">🔪</span>
+      <div class="stat-label">За нарез</div>
+      <div class="stat-value orange" id="per-tap">+1</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-emoji">🏅</span>
+      <div class="stat-label">Всего</div>
+      <div class="stat-value" id="total-display">0</div>
+    </div>
+  </div>
+
+  <div class="rank-section">
+    <div class="rank-header">
+      <span class="rank-left">📍 Статус</span>
+      <span class="rank-right" id="rank-name">Голодный студент</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="rank-progress" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="clicker-zone">
+    <div class="hunger-bar-wrap">
+      <div class="hunger-label">
+        <span>🌶️ Аппетит посетителей</span>
+        <span id="hunger-text">1000 / 1000</span>
+      </div>
+      <div class="hunger-bar">
+        <div class="hunger-fill" id="hunger-fill" style="width:100%"></div>
+      </div>
+    </div>
+    <div class="doner-wrap">
+      <div class="fire-glow"></div>
+      <div class="doner-btn" id="donerBtn" onclick="handleTap(event)">
+        <div class="doner-icon">🥙</div>
+        <div class="doner-tap-text">НАРЕЗАЙ</div>
+      </div>
+    </div>
+    <div class="combo-display" id="combo-display"></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('upgrades')">
+      <span class="tab-icon">⚙️</span>Кухня
+    </div>
+    <div class="tab" onclick="switchTab('leaderboard')">
+      <span class="tab-icon">🏆</span>Рейтинг
+    </div>
+    <div class="tab" onclick="switchTab('tasks')">
+      <span class="tab-icon">📋</span>Заказы
+    </div>
+  </div>
+
+  <div class="panel active" id="panel-upgrades">
+    <div class="section-title">🍴 Улучшения Кухни</div>
+    <div class="upgrade-grid" id="upgrade-grid"></div>
+  </div>
+
+  <div class="panel" id="panel-leaderboard">
+    <div class="section-title">🏆 Лучшие Едоки</div>
+    <div class="leaderboard" id="leaderboard">
+      <div class="lb-loading"><span class="lb-loading-spinner">🥙</span>Загружаем рейтинг...</div>
+    </div>
+    <button class="refresh-btn" onclick="loadLeaderboard()">↻ ОБНОВИТЬ РЕЙТИНГ</button>
+  </div>
+
+  <div class="panel" id="panel-tasks">
+    <div class="section-title">📋 Заказы Дня</div>
+    <div id="tasks-list"></div>
+  </div>
+
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
-/* ======================= TELEGRAM & USER ======================= */
-const tg = window.Telegram?.WebApp;
-if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor('#180d06'); tg.setBackgroundColor('#180d06'); }
+// ═══════════════════════════════════════════════
+//   ⚙️ НАСТРОЙКА — вставь свой URL воркера сюда
+// ═══════════════════════════════════════════════
+const API = 'https://doner-ahmed-api.ТВОЙ_SUBDOMAIN.workers.dev';
 
-const tgUser = tg?.initDataUnsafe?.user;
-const userId = String(tgUser?.id || 'demo_' + Math.random().toString(36).substr(2,6));
-const firstName = tgUser?.first_name || 'Гость';
-const lastName  = tgUser?.last_name  || '';
+// ═══════════════════════════════════════════════
+//   TELEGRAM — получаем реальные данные юзера
+// ═══════════════════════════════════════════════
+const tg       = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('#180d06'); tg.setBackgroundColor('#180d06'); }
+
+const tgUser   = tg?.initDataUnsafe?.user;
+
+// ID — реальный из Telegram, иначе fallback для тестов
+const userId   = String(tgUser?.id || 'demo_' + Math.random().toString(36).substr(2,6));
+
+// Имя: first_name + last_name
+const firstName  = tgUser?.first_name || 'Гость';
+const lastName   = tgUser?.last_name  || '';
 const displayName = (firstName + (lastName ? ' ' + lastName : '')).trim();
+
+// @username если есть
 const tgUsername = tgUser?.username ? '@' + tgUser.username : '';
+
+// Фото профиля (Telegram Mini App передаёт photo_url)
 const photoUrl   = tgUser?.photo_url || null;
+
+// Инициалы как запасной вариант
 const initials = displayName.split(/[\s_]/).map(w=>w[0]||'').join('').toUpperCase().substr(0,2) || '??';
 
 // Заполняем шапку
 document.getElementById('display-name').textContent = displayName;
-document.getElementById('tg-handle').textContent = tgUsername || 'Telegram пользователь';
+document.getElementById('tg-handle').textContent    = tgUsername || 'Telegram пользователь';
+
+// Аватар: фото или инициалы
 const avatarEl = document.getElementById('avatar');
-if(photoUrl) avatarEl.innerHTML = `<img src="${photoUrl}" alt="avatar" onerror="this.parentNode.textContent='${initials}'">`;
-else avatarEl.textContent = initials;
+if (photoUrl) {
+  avatarEl.innerHTML = `<img src="${photoUrl}" alt="avatar" onerror="this.parentNode.textContent='${initials}'">`;
+} else {
+  avatarEl.textContent = initials;
+}
 
-/* ======================= API HELPERS ======================= */
-const API = 'https://doner-ahmed-api.danilruzhitskiy.workers.dev/';
-
-function setSyncStatus(status){
-  const dot=document.getElementById('sync-dot');
-  const label=document.getElementById('sync-label');
-  dot.className='sync-dot'+(status==='syncing'?' syncing':status==='error'?' error':'');
+// ═══════════════════════════════════════════════
+//   API HELPERS
+// ═══════════════════════════════════════════════
+function setSyncStatus(status) {
+  const dot   = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  dot.className = 'sync-dot' + (status==='syncing'?' syncing':status==='error'?' error':'');
   label.textContent = status==='syncing'?'Синхронизация...':status==='error'?'Нет связи — сохранено локально':'Облако подключено';
 }
 
-async function apiLoad(){ try{ const res=await fetch(`${API}/load?userId=${userId}`); const data=await res.json(); if(data.found) return data.state;}catch(e){} return null; }
-async function apiSave(state){ setSyncStatus('syncing'); try{ const res=await fetch(`${API}/save`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId,userName:displayName+' '+tgUsername,state:{...state,level:getLevel()}})}); const data=await res.json(); if(data.ok){ setSyncStatus('ok'); return true; } }catch(e){} setSyncStatus('error'); return false; }
-async function apiLeaderboard(){ try{ const res=await fetch(`${API}/leaderboard`); const data=await res.json(); return data.leaderboard||[]; }catch(e){return[];} }
+async function apiLoad() {
+  try {
+    const res = await fetch(`${API}/load?userId=${userId}`);
+    const data = await res.json();
+    if (data.found) return data.state;
+  } catch(e) {}
+  return null;
+}
 
-/* ======================= GAME STATE ======================= */
-const RANKS=[ { name:'Голодный студент',  min:0, max:1000 }, { name:'Постоянный клиент', min:1000, max:10000 }, { name:'Ценитель специй', min:10000, max:50000 }, { name:'Друг Ахмеда', min:50000, max:200000 }, { name:'Шаурмастер', min:200000, max:1000000 }, { name:'Легенда Донерной', min:1000000, max:5000000 }, { name:'🔥 Сам Ахмед', min:5000000, max:Infinity} ];
+async function apiSave(state) {
+  setSyncStatus('syncing');
+  try {
+    const res = await fetch(`${API}/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        userName: displayName + (tgUsername ? ' ' + tgUsername : ''),
+        state: { ...state, level: getLevel() }
+      })
+    });
+    const data = await res.json();
+    if (data.ok) { setSyncStatus('ok'); return true; }
+  } catch(e) {}
+  setSyncStatus('error');
+  return false;
+}
 
-const UPGRADES=[ { id:'knife',   name:'Острый нож', icon:'🔪', desc:'Тоньше нарезка — больше лир', baseCost:50, mult:2.2, max:10, effect:'tap', val:1 }, { id:'lavash', name:'Свежий лаваш', icon:'🫓', desc:'Больше аппетита посетителей', baseCost:200, mult:2.5, max:5, effect:'maxEnergy', val:200 }, { id:'grill', id:'🔥', desc:'Мясо готовится быстрее', baseCost:300, mult:3, max:5, effect:'regen', val:0.5 }, { id:'sauce', name:'Чесночный соус', icon:'🧄', desc:'Шанс мега-порции ×5', baseCost:500, mult:2.8, max:5, effect:'crit', val:5 }, { id:'mustafa', name:'Помощник Мустафа', icon:'👨‍🍳', desc:'Авто-нарезка', baseCost:2000, mult:4, max:3, effect:'auto', val:1 }, { id:'double', name:'Двойной донер', icon:'🥙', desc:'Множитель комбо-заказов', baseCost:1500, mult:3.5, max:5, effect:'combo', val:0.2 } ];
+async function apiLeaderboard() {
+  try {
+    const res = await fetch(`${API}/leaderboard`);
+    const data = await res.json();
+    return data.leaderboard || [];
+  } catch(e) { return []; }
+}
 
-function defaultState(){ return { coins:0,totalEarned:0,energy:1000,maxEnergy:1000,regenRate:1,tapPower:1,critChance:0.05,critMult:5,autoLevel:0,comboMult:1,upgrades:{knife:0,lavash:0,grill:0,sauce:0,mustafa:0,double:0},lastSave:Date.now(),lastDaily:0,tasks:{tap500:0,earn10k:0,upgrade3:0} }; }
-let state=defaultState();
+// ═══════════════════════════════════════════════
+//   GAME CONFIG
+// ═══════════════════════════════════════════════
+const RANKS = [
+  { name:'Голодный студент',  min:0,       max:1000    },
+  { name:'Постоянный клиент', min:1000,    max:10000   },
+  { name:'Ценитель специй',   min:10000,   max:50000   },
+  { name:'Друг Ахмеда',       min:50000,   max:200000  },
+  { name:'Шаурмастер',        min:200000,  max:1000000 },
+  { name:'Легенда Донерной',  min:1000000, max:5000000 },
+  { name:'🔥 Сам Ахмед',      min:5000000, max:Infinity},
+];
 
-function getLevel(){ const t=state.totalEarned; if(t<1000)return 1;if(t<5000)return 2;if(t<20000)return 3;if(t<100000)return 4;if(t<500000)return 5;if(t<2000000)return 6; return 7; }
-function getRank(){ return RANKS.find(r=>state.totalEarned>=r.min&&state.totalEarned<r.max)||RANKS[RANKS.length-1]; }
-function upgCost(cfg,lv){ return Math.floor(cfg.baseCost*Math.pow(cfg.mult,lv)); }
-function fmt(n){ if(n>=1e9)return(n/1e9).toFixed(1)+'B'; if(n>=1e6)return(n/1e6).toFixed(1)+'M'; if(n>=1e3)return(n/1e3).toFixed(1)+'K'; return Math.floor(n).toString(); }
+const UPGRADES = [
+  { id:'knife',   name:'Острый нож',       icon:'🔪', desc:'Тоньше нарезка — больше лир',       baseCost:50,   mult:2.2, max:10, effect:'tap',       val:1   },
+  { id:'lavash',  name:'Свежий лаваш',     icon:'🫓', desc:'Больше аппетита посетителей',       baseCost:200,  mult:2.5, max:5,  effect:'maxEnergy', val:200 },
+  { id:'grill',   name:'Угольный гриль',   icon:'🔥', desc:'Мясо готовится быстрее',            baseCost:300,  mult:3,   max:5,  effect:'regen',     val:0.5 },
+  { id:'sauce',   name:'Чесночный соус',   icon:'🧄', desc:'Шанс мега-порции ×5',              baseCost:500,  mult:2.8, max:5,  effect:'crit',      val:5   },
+  { id:'mustafa', name:'Помощник Мустафа', icon:'👨‍🍳', desc:'Авто-нарезка пока ты отдыхаешь', baseCost:2000, mult:4,   max:3,  effect:'auto',      val:1   },
+  { id:'double',  name:'Двойной донер',    icon:'🥙', desc:'Множитель комбо-заказов',           baseCost:1500, mult:3.5, max:5,  effect:'combo',     val:0.2 },
+];
 
-/* ======================= SAVE / LOAD ======================= */
-async function saveState(){ state.lastSave=Date.now(); try{ localStorage.setItem('doner_backup_'+userId,JSON.stringify(state)); }catch(e){} await apiSave(state); }
-async function loadState(){ const cloud=await apiLoad(); if(cloud){ state={...defaultState(),...cloud}; return; } try{ const local=localStorage.getItem('doner_backup_'+userId); if(local){ state={...defaultState(),...JSON.parse(local)}; return; } }catch(e){} state=defaultState(); }
+// ═══════════════════════════════════════════════
+//   STATE
+// ═══════════════════════════════════════════════
+function defaultState() {
+  return {
+    coins:0, totalEarned:0,
+    energy:1000, maxEnergy:1000,
+    regenRate:1, tapPower:1, critChance:0.05, critMult:5,
+    autoLevel:0, comboMult:1,
+    upgrades:{ knife:0, lavash:0, grill:0, sauce:0, mustafa:0, double:0 },
+    lastSave: Date.now(), lastDaily:0,
+    tasks:{ tap500:0, earn10k:0, upgrade3:0 }
+  };
+}
 
-/* ======================= TAP & COMBO ======================= */
+let state = defaultState();
+
+function getLevel() {
+  const t=state.totalEarned;
+  if(t<1000)return 1; if(t<5000)return 2; if(t<20000)return 3;
+  if(t<100000)return 4; if(t<500000)return 5; if(t<2000000)return 6; return 7;
+}
+function getRank() {
+  return RANKS.find(r=>state.totalEarned>=r.min&&state.totalEarned<r.max)||RANKS[RANKS.length-1];
+}
+function upgCost(cfg,lv) { return Math.floor(cfg.baseCost*Math.pow(cfg.mult,lv)); }
+function fmt(n) {
+  if(n>=1e9)return(n/1e9).toFixed(1)+'B';
+  if(n>=1e6)return(n/1e6).toFixed(1)+'M';
+  if(n>=1e3)return(n/1e3).toFixed(1)+'K';
+  return Math.floor(n).toString();
+}
+
+// ═══════════════════════════════════════════════
+//   SAVE / LOAD
+// ═══════════════════════════════════════════════
+async function saveState() {
+  state.lastSave = Date.now();
+  // Сохраняем локально как резерв
+  try { localStorage.setItem('doner_backup_'+userId, JSON.stringify(state)); } catch(e){}
+  // Сохраняем в облако
+  await apiSave(state);
+}
+
+async function loadState() {
+  // 1. Пробуем облако
+  const cloud = await apiLoad();
+  if (cloud) {
+    state = { ...defaultState(), ...cloud };
+    return;
+  }
+  // 2. Резерв — localStorage
+  try {
+    const local = localStorage.getItem('doner_backup_'+userId);
+    if (local) { state = { ...defaultState(), ...JSON.parse(local) }; return; }
+  } catch(e) {}
+  // 3. Новый игрок
+  state = defaultState();
+}
+
+// ═══════════════════════════════════════════════
+//   DAILY
+// ═══════════════════════════════════════════════
+function claimDaily() {
+  if (Date.now()-(state.lastDaily||0) < 24*3600*1000) {
+    showToast('⏰ Уже получил! Завтра снова'); return;
+  }
+  state.lastDaily = Date.now();
+  const bonus = 500 + getLevel()*200;
+  state.coins+=bonus; state.totalEarned+=bonus;
+  tg?.HapticFeedback?.notificationOccurred('success');
+  showToast(`🎁 Ахмед угостил тебя! +${fmt(bonus)} лир`);
+  document.getElementById('daily-banner').style.opacity='0.4';
+  saveState(); updateUI();
+}
+
+// ═══════════════════════════════════════════════
+//   TAP
+// ═══════════════════════════════════════════════
 let comboCount=0, comboTimer=null, lastTapTime=0;
-function handleTap(e){
-  if(state.energy<=0){ showToast('😤 Посетители наелись! Жди следующих...'); document.getElementById('donerBtn').classList.add('shake'); setTimeout(()=>document.getElementById('donerBtn').classList.remove('shake'),200); return; }
+
+function handleTap(e) {
+  if (state.energy<=0) {
+    showToast('😤 Посетители наелись! Жди следующих...');
+    document.getElementById('donerBtn').classList.add('shake');
+    setTimeout(()=>document.getElementById('donerBtn').classList.remove('shake'),200);
+    return;
+  }
   const now=Date.now(), diff=now-lastTapTime; lastTapTime=now;
   comboCount = diff<600 ? Math.min(comboCount+1,50) : 1;
   clearTimeout(comboTimer);
   comboTimer=setTimeout(()=>{ comboCount=0; document.getElementById('combo-display').textContent=''; },1200);
 
   let earned=state.tapPower, isCrit=false;
-  if(Math.random()<state.critChance){ earned*=state.critMult; isCrit=true; }
-  if(comboCount>5) earned=Math.floor(earned*(1+(comboCount-5)*state.comboMult*0.1));
+  if (Math.random()<state.critChance) { earned*=state.critMult; isCrit=true; }
+  if (comboCount>5) earned=Math.floor(earned*(1+(comboCount-5)*state.comboMult*0.1));
   earned=Math.floor(earned);
 
-  state.coins+=earned; state.totalEarned+=earned; state.energy=Math.max(0,state.energy-1);
-  state.tasks.tap500=(state.tasks.tap500||0)+1; state.tasks.earn10k=(state.tasks.earn10k||0)+earned;
+  state.coins+=earned; state.totalEarned+=earned;
+  state.energy=Math.max(0,state.energy-1);
+  state.tasks.tap500=(state.tasks.tap500||0)+1;
+  state.tasks.earn10k=(state.tasks.earn10k||0)+earned;
 
   const rect=document.getElementById('donerBtn').getBoundingClientRect();
   const x=e.clientX||rect.left+rect.width/2, y=e.clientY||rect.top+rect.height/2;
   spawnFloat(x,y,earned,isCrit);
+  spawnParticles(x,y,isCrit);
 
   isCrit ? tg?.HapticFeedback?.impactOccurred('heavy') : tg?.HapticFeedback?.impactOccurred('light');
-  document.getElementById('combo-display').textContent = comboCount>3 ? `КОМБО ×${comboCount}` : '';
+
+  if (comboCount>3) {
+    const icons=['🔪','🌶️','🧄','🔥','💥'];
+    document.getElementById('combo-display').textContent=`${icons[Math.min(Math.floor(comboCount/8),4)]} КОМБО-ЗАКАЗ ×${comboCount}`;
+  } else { document.getElementById('combo-display').textContent=''; }
   updateUI();
 }
 
-/* ======================= FLOAT ======================= */
-function spawnFloat(x,y,val,isCrit){
+// ═══════════════════════════════════════════════
+//   FLOAT NUMBERS + PARTICLES
+// ═══════════════════════════════════════════════
+function spawnFloat(x,y,val,isCrit) {
   const el=document.createElement('div');
-  el.className='float-num'+(isCrit?' crit':''); el.textContent='+'+fmt(val)+'₺'+(isCrit?' МЕГА-ДОНЕР!':'');
-  el.style.left=(x-30+(Math.random()*20-10))+'px'; el.style.top=(y-20)+'px';
-  document.body.appendChild(el); setTimeout(()=>el.remove(),850);
+  el.className='float-num'+(isCrit?' crit':'');
+  el.textContent='+'+fmt(val)+'₺'+(isCrit?' МЕГА-ДОНЕР!':'');
+  el.style.left=(x-30+(Math.random()*20-10))+'px';
+  el.style.top=(y-20)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),850);
 }
 
-/* ======================= TOAST ======================= */
-function showToast(text){ const el=document.getElementById('toast'); el.textContent=text; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2000); }
+const canvas=document.getElementById('canvas'), ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+window.addEventListener('resize',()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
 
-/* ======================= UI UPDATE ======================= */
-function updateUI(){
-  document.getElementById('coins-display').textContent = fmt(state.coins);
-  document.getElementById('total-display').textContent = fmt(state.totalEarned);
-  const rank=getRank(); document.getElementById('rank-name').textContent=rank.name;
-  const fill=Math.min(100,(state.totalEarned-rank.min)/(rank.max-rank.min)*100); document.getElementById('rank-progress').style.width=fill+'%';
-  const hungerFill=document.getElementById('hunger-fill'); hungerFill.style.width=(state.energy/state.maxEnergy*100)+'%';
+const particles=[];
+function spawnParticles(x,y,isCrit) {
+  const count=isCrit?22:9;
+  for(let i=0;i<count;i++){
+    const angle=(Math.PI*2*i)/count+Math.random()*0.6, speed=2+Math.random()*(isCrit?7:3.5);
+    particles.push({ x,y, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed-2.5,
+      life:1, decay:0.04+Math.random()*0.035, size:isCrit?6+Math.random()*4:3+Math.random()*2.5,
+      color:isCrit?`hsl(${10+Math.random()*30},100%,55%)`:`hsl(${30+Math.random()*30},95%,55%)` });
+  }
+}
+function animateParticles() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.18; p.life-=p.decay;
+    if(p.life<=0){particles.splice(i,1);continue;}
+    ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha=1; requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ═══════════════════════════════════════════════
+//   UI
+// ═══════════════════════════════════════════════
+function updateUI() {
+  document.getElementById('coins-display').textContent=fmt(state.coins);
+  document.getElementById('total-display').textContent=fmt(state.totalEarned);
+  document.getElementById('per-tap').textContent='+'+fmt(state.tapPower);
+  document.getElementById('level-num').textContent=getLevel();
+  const rank=getRank();
+  document.getElementById('rank-name').textContent=rank.name;
+  document.getElementById('rank-pill').textContent=rank.name;
+  const pct=((state.totalEarned-rank.min)/(rank.max-rank.min))*100;
+  document.getElementById('rank-progress').style.width=Math.min(100,pct)+'%';
+  document.getElementById('hunger-fill').style.width=(state.energy/state.maxEnergy*100)+'%';
   document.getElementById('hunger-text').textContent=`${state.energy} / ${state.maxEnergy}`;
+  renderUpgrades(); renderTasks();
 }
 
-/* ======================= INIT ======================= */
-(async function(){ await loadState(); updateUI(); document.getElementById('loading-screen').classList.add('hidden'); })();
+// ═══════════════════════════════════════════════
+//   UPGRADES
+// ═══════════════════════════════════════════════
+function renderUpgrades() {
+  const grid=document.getElementById('upgrade-grid'); grid.innerHTML='';
+  UPGRADES.forEach(cfg=>{
+    const lv=state.upgrades[cfg.id]||0, isMax=lv>=cfg.max, cost=upgCost(cfg,lv), canAfford=state.coins>=cost;
+    const card=document.createElement('div');
+    card.className='upgrade-card '+(isMax?'maxed':canAfford?'affordable':'cant-afford');
+    card.innerHTML=`
+      <div class="upgrade-icon">${cfg.icon}</div>
+      <div class="upgrade-info">
+        <div class="upgrade-name">${cfg.name}</div>
+        <div class="upgrade-desc">${cfg.desc}</div>
+        <div class="upgrade-level">Уровень ${lv} / ${cfg.max}</div>
+      </div>
+      <div class="upgrade-cost">${isMax?'<span class="maxed-label">✓ ГОТОВО</span>':`${fmt(cost)}<small>лир</small>`}</div>
+    `;
+    if(!isMax) card.onclick=()=>buyUpgrade(cfg.id);
+    grid.appendChild(card);
+  });
+}
+
+function buyUpgrade(id) {
+  const cfg=UPGRADES.find(u=>u.id===id), lv=state.upgrades[id]||0;
+  if(lv>=cfg.max) return;
+  const cost=upgCost(cfg,lv);
+  if(state.coins<cost){showToast('💸 Мало лир! Нарезай больше!');return;}
+  state.coins-=cost; state.upgrades[id]=lv+1;
+  if(cfg.effect==='tap')       state.tapPower+=cfg.val;
+  else if(cfg.effect==='maxEnergy') state.maxEnergy+=cfg.val;
+  else if(cfg.effect==='regen')     state.regenRate+=cfg.val;
+  else if(cfg.effect==='crit')      state.critChance=Math.min(0.5,state.critChance+0.08);
+  else if(cfg.effect==='auto')      state.autoLevel+=1;
+  else if(cfg.effect==='combo')     state.comboMult+=cfg.val;
+  state.tasks.upgrade3=(state.tasks.upgrade3||0)+1;
+  tg?.HapticFeedback?.notificationOccurred('success');
+  showToast(`✅ ${cfg.name} улучшен до ур. ${lv+1}!`);
+  saveState(); updateUI();
+}
+
+// ═══════════════════════════════════════════════
+//   LEADERBOARD — из Cloudflare
+// ═══════════════════════════════════════════════
+async function loadLeaderboard() {
+  const container=document.getElementById('leaderboard');
+  container.innerHTML=`<div class="lb-loading"><span class="lb-loading-spinner">🥙</span>Загружаем рейтинг...</div>`;
+
+  const lb = await apiLeaderboard();
+
+  container.innerHTML='';
+  if(lb.length===0){
+    container.innerHTML=`<div class="lb-loading">Будь первым в рейтинге! 🥇</div>`;
+    return;
+  }
+
+  const myPos=lb.findIndex(p=>p.id===userId)+1;
+
+  lb.slice(0,20).forEach((player,i)=>{
+    const rank=i+1, isMe=player.id===userId;
+    const div=document.createElement('div');
+    div.className='leader-item'+(isMe?' me':'')+(rank===1?' top1':rank===2?' top2':rank===3?' top3':'');
+    const badge=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank;
+    // Показываем @username если есть в имени
+    const nameParts = player.name.split(' ');
+    const handle = nameParts.find(p=>p.startsWith('@')) || '';
+    const cleanName = nameParts.filter(p=>!p.startsWith('@')).join(' ');
+    const ini=cleanName.split(/[\s_]/).map(w=>w[0]||'').join('').toUpperCase().substr(0,2)||'??';
+    div.innerHTML=`
+      <div class="leader-rank ${rank<=3?'rank-'+rank:'rank-other'}">${badge}</div>
+      <div class="leader-avatar">${ini}</div>
+      <div class="leader-name">
+        <strong>${cleanName}${isMe?' 👈':''}${handle?` <span style="color:var(--muted);font-weight:600;font-size:11px">${handle}</span>`:''}</strong>
+        <span>Шеф-повар ур. ${player.level||1} · ${getRankName(player.score)}</span>
+      </div>
+      <div class="leader-score">${fmt(player.score)}₺<small>лир заработано</small></div>
+    `;
+    container.appendChild(div);
+  });
+
+  if(myPos>20||myPos===0){
+    const div=document.createElement('div');
+    div.style.cssText='text-align:center;padding:12px;font-size:13px;color:var(--muted);font-weight:700;';
+    div.textContent=myPos?`Твоё место: #${myPos}`:'— Нарезай больше, чтобы попасть в ТОП —';
+    container.appendChild(div);
+  }
+}
+
+function getRankName(score) {
+  return (RANKS.find(r=>score>=r.min&&score<r.max)||RANKS[RANKS.length-1]).name;
+}
+
+// ═══════════════════════════════════════════════
+//   TASKS
+// ═══════════════════════════════════════════════
+const TASKS=[
+  {id:'tap500',   name:'Нарежь 500 порций',      icon:'🔪',goal:500,  reward:500, unit:'порций'},
+  {id:'earn10k',  name:'Заработай 10 000 лир',   icon:'💵',goal:10000,reward:1000,unit:'лир'},
+  {id:'upgrade3', name:'Купи 3 улучшения кухни', icon:'🍳',goal:3,    reward:800, unit:'апгр.'},
+];
+function renderTasks() {
+  const c=document.getElementById('tasks-list'); c.innerHTML='';
+  TASKS.forEach(task=>{
+    const prog=Math.min(task.goal,state.tasks[task.id]||0), done=prog>=task.goal;
+    const div=document.createElement('div'); div.className='challenge-card';
+    div.innerHTML=`
+      ${done?'<div class="task-done-stamp">✅</div>':''}
+      <div class="challenge-header">
+        <div class="challenge-name">${task.icon} ${task.name}</div>
+        <div class="challenge-reward">+${fmt(task.reward)} ₺</div>
+      </div>
+      <div class="challenge-progress">${fmt(prog)} / ${fmt(task.goal)} ${task.unit}</div>
+      <div class="ch-bar"><div class="ch-fill" style="width:${(prog/task.goal)*100}%"></div></div>
+    `;
+    if(done) div.style.borderColor='rgba(124,179,66,0.4)';
+    c.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//   TABS
+// ═══════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  ['upgrades','leaderboard','tasks'].forEach((n,i)=>{
+    if(n===name){ document.querySelectorAll('.tab')[i].classList.add('active'); document.getElementById('panel-'+n).classList.add('active'); }
+  });
+  if(name==='leaderboard') loadLeaderboard();
+}
+
+// ═══════════════════════════════════════════════
+//   TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2700);
+}
+
+// ═══════════════════════════════════════════════
+//   LOOPS
+// ═══════════════════════════════════════════════
+setInterval(()=>{
+  if(state.energy<state.maxEnergy){ state.energy=Math.min(state.maxEnergy,state.energy+state.regenRate); updateUI(); }
+},1000);
+
+setInterval(()=>{
+  if(state.autoLevel>0&&state.energy>0){
+    const e=state.tapPower*state.autoLevel; state.coins+=e; state.totalEarned+=e;
+    state.energy=Math.max(0,state.energy-state.autoLevel); updateUI();
+  }
+},1000);
+
+let lastLevel=1;
+setInterval(()=>{
+  const lv=getLevel();
+  if(lv>lastLevel){ lastLevel=lv; tg?.HapticFeedback?.notificationOccurred('success'); showToast(`🎉 Ахмед доволен! Новый уровень шефа: ${lv}`); }
+},2000);
+
+// Автосохранение в облако каждые 10 секунд
+setInterval(saveState, 10000);
+
+// Сохранение при закрытии
+window.addEventListener('beforeunload', saveState);
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveState(); });
+if(tg) tg.onEvent('viewportChanged', ()=>{ if(!tg.isExpanded) saveState(); });
+
+// ═══════════════════════════════════════════════
+//   INIT
+// ═══════════════════════════════════════════════
+async function init() {
+  const screen = document.getElementById('loading-screen');
+
+  await loadState();
+
+  // Offline earnings
+  const offline=(Date.now()-(state.lastSave||Date.now()))/1000;
+  state.energy=Math.min(state.maxEnergy,state.energy+Math.floor(offline*state.regenRate));
+  if(offline>5&&state.autoLevel>0){
+    const oe=Math.floor(offline*state.autoLevel*state.tapPower);
+    if(oe>0){ state.coins+=oe; state.totalEarned+=oe; setTimeout(()=>showToast(`👨‍🍳 Мустафа нарезал: +${fmt(oe)} лир`),1000); }
+  }
+
+  lastLevel=getLevel();
+
+  if(Date.now()-(state.lastDaily||0)<24*3600*1000){
+    document.getElementById('daily-banner').style.opacity='0.4';
+  }
+
+  updateUI();
+
+  // Скрываем загрузочный экран
+  screen.classList.add('hidden');
+
+  // Сохраняем сразу (регистрируем игрока в рейтинге)
+  saveState();
+}
+
+init();
 </script>
 </body>
 </html>
