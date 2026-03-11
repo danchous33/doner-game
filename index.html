@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Донерная Ахмеда 🥙</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -79,6 +80,17 @@
     font-family:'Bebas Neue', sans-serif; font-size:13px;
     color: var(--saffron); letter-spacing:1.5px;
   }
+
+  /* SYNC STATUS */
+  .sync-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:#aaa; display:inline-block; margin-right:4px;
+    transition: background 0.3s;
+  }
+  .sync-dot.synced  { background:#7cb342; box-shadow:0 0 6px rgba(124,179,66,0.6); }
+  .sync-dot.syncing { background:var(--saffron); animation: pulse-dot 0.8s infinite; }
+  .sync-dot.error   { background:var(--sauce); }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
   /* USER ROW */
   .user-row {
@@ -157,7 +169,6 @@
     transition: width 0.3s ease;
   }
 
-  /* DONER BUTTON — увеличена зона нажатия */
   .doner-wrap { position:relative; margin:4px 0 4px; }
 
   .fire-glow {
@@ -173,7 +184,6 @@
   }
 
   .doner-btn {
-    /* Увеличена с 190px до 230px */
     width:230px; height:230px; border-radius:50%;
     background:
       radial-gradient(circle at 38% 38%, rgba(255,200,100,0.18) 0%, transparent 55%),
@@ -186,7 +196,6 @@
       inset 0 0 30px rgba(255,150,50,0.1);
     transition: transform 0.08s ease, box-shadow 0.08s ease;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
-    /* Дополнительная зона касания через padding */
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
@@ -415,7 +424,9 @@
         <div class="shop-sub">TAP &amp; EAT SINCE 1994</div>
       </div>
     </div>
-    <div class="chef-badge">ШЕФ <span id="level-num">1</span></div>
+    <div class="chef-badge">
+      <span class="sync-dot" id="sync-dot"></span>ШЕФ <span id="level-num">1</span>
+    </div>
   </div>
 
   <div class="user-row">
@@ -524,6 +535,16 @@
 
 <script>
 // ═══════════════════════════════════════
+//   ⚙️  НАСТРОЙКА SUPABASE
+//   Замени эти две строки своими данными из Supabase → Settings → API
+// ═══════════════════════════════════════
+const SUPABASE_URL  = 'https://lxbjtqzfcwcbeteimzos.supabase.co';      // ← вставь сюда
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4Ymp0cXpmY3djYmV0ZWltem9zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMzU1MTQsImV4cCI6MjA4ODgxMTUxNH0.nDKvv0LDd4Fa_hmuNPdSTanyXNC0WQmEklm-OPUQ6_M'; // ← вставь сюда
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ═══════════════════════════════════════
 //   TELEGRAM INIT
 // ═══════════════════════════════════════
 const tg = window.Telegram?.WebApp;
@@ -545,71 +566,11 @@ document.getElementById('username').textContent = userName;
 document.getElementById('avatar').textContent   = initials;
 
 // ═══════════════════════════════════════
-//   CLOUD STORAGE (Telegram CloudStorage API)
-//   Надёжное сохранение на серверах Telegram
+//   SYNC STATUS DOT
 // ═══════════════════════════════════════
-const Cloud = {
-  get(key) {
-    return new Promise(resolve => {
-      if (tg?.CloudStorage) {
-        tg.CloudStorage.getItem(key, (err, val) => resolve(val || null));
-      } else {
-        resolve(localStorage.getItem(key));
-      }
-    });
-  },
-  set(key, value) {
-    return new Promise(resolve => {
-      if (tg?.CloudStorage) {
-        tg.CloudStorage.setItem(key, value, () => resolve());
-      } else {
-        localStorage.setItem(key, value);
-        resolve();
-      }
-    });
-  }
-};
-
-// ═══════════════════════════════════════
-//   SHARED LEADERBOARD (через Anthropic API)
-// ═══════════════════════════════════════
-const LB_KEY = 'ahmedsdoner_leaderboard_v1';
-
-async function saveToLeaderboard(score, level) {
-  try {
-    // Получаем текущую таблицу
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 100,
-        messages: [{ role: "user", content: "ping" }]
-      })
-    });
-  } catch(e) {}
-
-  // Используем localStorage как общий fallback через одинаковый ключ
-  try {
-    const raw = localStorage.getItem(LB_KEY);
-    const lb = raw ? JSON.parse(raw) : [];
-    const idx = lb.findIndex(p => p.id === userId);
-    const entry = { id: userId, name: userName, score, level, ts: Date.now() };
-    if (idx >= 0) {
-      if (score > lb[idx].score) lb[idx] = entry;
-    } else {
-      lb.push(entry);
-    }
-    lb.sort((a,b) => b.score - a.score);
-    localStorage.setItem(LB_KEY, JSON.stringify(lb.slice(0, 100)));
-  } catch(e) {}
-}
-
-async function getLeaderboard() {
-  try {
-    const raw = localStorage.getItem(LB_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch(e) { return []; }
+function setSyncStatus(status) {
+  const dot = document.getElementById('sync-dot');
+  dot.className = 'sync-dot ' + status;
 }
 
 // ═══════════════════════════════════════
@@ -635,12 +596,8 @@ const UPGRADES_CONFIG = [
 ];
 
 // ═══════════════════════════════════════
-//   STATE — двойное сохранение
-//   1. Telegram CloudStorage (основное)
-//   2. localStorage (резервное)
+//   STATE
 // ═══════════════════════════════════════
-const SAVE_KEY = 'ahmedsdoner_save_v2';
-
 function defaultState() {
   return {
     coins:0, totalEarned:0,
@@ -657,37 +614,128 @@ function defaultState() {
 let state = defaultState();
 let stateLoaded = false;
 
+// ═══════════════════════════════════════
+//   LOAD STATE — сначала Supabase, потом localStorage
+// ═══════════════════════════════════════
 async function loadState() {
+  setSyncStatus('syncing');
   try {
-    // Сначала пробуем Telegram CloudStorage
-    const cloudData = await Cloud.get(SAVE_KEY);
-    if (cloudData) {
-      const parsed = JSON.parse(cloudData);
-      state = { ...defaultState(), ...parsed };
+    const { data, error } = await db
+      .from('players')
+      .select('state_json')
+      .eq('user_id', userId)
+      .single();
+
+    if (!error && data?.state_json) {
+      state = { ...defaultState(), ...data.state_json };
+      setSyncStatus('synced');
       stateLoaded = true;
       return;
     }
-  } catch(e) {}
+  } catch(e) {
+    console.warn('Supabase load failed, using localStorage:', e);
+  }
 
   // Резерв — localStorage
   try {
-    const localData = localStorage.getItem(SAVE_KEY);
-    if (localData) {
-      state = { ...defaultState(), ...JSON.parse(localData) };
-    }
+    const local = localStorage.getItem('ahmedsdoner_v3_' + userId);
+    if (local) state = { ...defaultState(), ...JSON.parse(local) };
   } catch(e) {}
 
+  setSyncStatus('error');
   stateLoaded = true;
 }
 
+// ═══════════════════════════════════════
+//   SAVE STATE — в Supabase + localStorage
+// ═══════════════════════════════════════
+let isSaving = false;
 async function saveState() {
+  if (!stateLoaded || isSaving) return;
+  isSaving = true;
   state.lastSave = Date.now();
-  const json = JSON.stringify(state);
-  // Сохраняем в оба места одновременно
-  await Cloud.set(SAVE_KEY, json);
-  try { localStorage.setItem(SAVE_KEY, json); } catch(e) {}
-  // Обновляем рейтинг
-  await saveToLeaderboard(state.totalEarned, getLevel());
+
+  // Всегда пишем в localStorage как кэш
+  try {
+    localStorage.setItem('ahmedsdoner_v3_' + userId, JSON.stringify(state));
+  } catch(e) {}
+
+  // Основное сохранение в Supabase
+  setSyncStatus('syncing');
+  try {
+    const { error } = await db.from('players').upsert({
+      user_id:      userId,
+      username:     userName,
+      state_json:   state,
+      total_earned: state.totalEarned,
+      level:        getLevel(),
+      updated_at:   new Date().toISOString()
+    }, { onConflict: 'user_id' });
+
+    setSyncStatus(error ? 'error' : 'synced');
+  } catch(e) {
+    setSyncStatus('error');
+  }
+  isSaving = false;
+}
+
+// ═══════════════════════════════════════
+//   LEADERBOARD — из Supabase (реальный общий)
+// ═══════════════════════════════════════
+async function loadLeaderboard() {
+  const container = document.getElementById('leaderboard');
+  container.innerHTML = `<div class="lb-loading"><span class="lb-loading-spinner">🥙</span>Загружаем рейтинг...</div>`;
+
+  try {
+    const { data, error } = await db
+      .from('players')
+      .select('user_id, username, total_earned, level')
+      .order('total_earned', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+
+    container.innerHTML = '';
+    if (!data || data.length === 0) {
+      container.innerHTML = `<div class="lb-loading">Будь первым в рейтинге! 🥇</div>`;
+      return;
+    }
+
+    let myPos = data.findIndex(p => p.user_id === userId) + 1;
+
+    data.forEach((player, i) => {
+      const rank  = i + 1;
+      const isMe  = player.user_id === userId;
+      const badge = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank;
+      const ini   = (player.username||'??').split(/[\s_]/).map(w=>w[0]||'').join('').toUpperCase().substr(0,2)||'??';
+      const div   = document.createElement('div');
+      div.className = 'leader-item'+(isMe?' me':'')+(rank===1?' top1':rank===2?' top2':rank===3?' top3':'');
+      div.innerHTML = `
+        <div class="leader-rank ${rank<=3?'rank-'+rank:'rank-other'}">${badge}</div>
+        <div class="leader-avatar">${ini}</div>
+        <div class="leader-name">
+          <strong>${player.username||'Аноним'}${isMe?' 👈 (Ты)':''}</strong>
+          <span>Шеф-повар ур. ${player.level||1}</span>
+        </div>
+        <div class="leader-score">
+          ${fmt(player.total_earned||0)}₺
+          <small>лир заработано</small>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+
+    if (myPos === 0 && state.totalEarned > 0) {
+      const div = document.createElement('div');
+      div.style.cssText = 'text-align:center;padding:12px;font-size:13px;color:var(--muted);font-weight:700;';
+      div.textContent = 'Ты ещё не в топ-20';
+      container.appendChild(div);
+    }
+
+  } catch(e) {
+    container.innerHTML = `<div class="lb-loading">⚠️ Ошибка загрузки рейтинга</div>`;
+    console.error('Leaderboard error:', e);
+  }
 }
 
 // ═══════════════════════════════════════
@@ -919,59 +967,6 @@ function buyUpgrade(id) {
 }
 
 // ═══════════════════════════════════════
-//   LEADERBOARD — общий для всех
-// ═══════════════════════════════════════
-async function loadLeaderboard() {
-  const container = document.getElementById('leaderboard');
-  container.innerHTML = `<div class="lb-loading"><span class="lb-loading-spinner">🥙</span>Загружаем рейтинг...</div>`;
-
-  const lb = await getLeaderboard();
-
-  // Добавляем текущего игрока если его нет
-  if (!lb.find(p=>p.id===userId) && state.totalEarned > 0) {
-    lb.push({ id:userId, name:userName, score:state.totalEarned, level:getLevel() });
-    lb.sort((a,b)=>b.score-a.score);
-  }
-
-  container.innerHTML = '';
-  const myPos = lb.findIndex(p=>p.id===userId)+1;
-
-  if (lb.length === 0) {
-    container.innerHTML = `<div class="lb-loading">Будь первым в рейтинге! 🥇</div>`;
-    return;
-  }
-
-  lb.slice(0,20).forEach((player,i)=>{
-    const rank = i+1;
-    const isMe = player.id===userId;
-    const div = document.createElement('div');
-    div.className = 'leader-item'+(isMe?' me':'')+(rank===1?' top1':rank===2?' top2':rank===3?' top3':'');
-    const badge = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank;
-    const ini = player.name.split(/[\s_]/).map(w=>w[0]||'').join('').toUpperCase().substr(0,2)||'??';
-    div.innerHTML=`
-      <div class="leader-rank ${rank<=3?'rank-'+rank:'rank-other'}">${badge}</div>
-      <div class="leader-avatar">${ini}</div>
-      <div class="leader-name">
-        <strong>${player.name}${isMe?' 👈 (Ты)':''}</strong>
-        <span>Шеф-повар ур. ${player.level||1}</span>
-      </div>
-      <div class="leader-score">
-        ${fmt(player.score)}₺
-        <small>лир заработано</small>
-      </div>
-    `;
-    container.appendChild(div);
-  });
-
-  if (myPos>20) {
-    const div=document.createElement('div');
-    div.style.cssText='text-align:center;padding:12px;font-size:13px;color:var(--muted);font-weight:700;';
-    div.textContent=`Твоё место в рейтинге: #${myPos}`;
-    container.appendChild(div);
-  }
-}
-
-// ═══════════════════════════════════════
 //   TASKS
 // ═══════════════════════════════════════
 const TASKS_CONFIG = [
@@ -1059,25 +1054,20 @@ setInterval(()=>{
   }
 },2000);
 
-// Автосохранение каждые 5 секунд
-setInterval(saveState, 5000);
+// Автосохранение каждые 8 секунд (не слишком часто для API)
+setInterval(saveState, 8000);
 
-// Сохранение при закрытии/сворачивании
 window.addEventListener('beforeunload', saveState);
-document.addEventListener('visibilitychange', ()=>{
-  if (document.hidden) saveState();
-});
-if (tg) {
-  tg.onEvent('viewportChanged', ()=>{ if(!tg.isExpanded) saveState(); });
-}
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveState(); });
+if (tg) tg.onEvent('viewportChanged', ()=>{ if(!tg.isExpanded) saveState(); });
 
 // ═══════════════════════════════════════
-//   INIT — загружаем сохранение потом запускаем
+//   INIT
 // ═══════════════════════════════════════
 async function init() {
   await loadState();
 
-  // Offline earnings
+  // Оффлайн-доходы
   const offlineSec = (Date.now()-(state.lastSave||Date.now()))/1000;
   state.energy = Math.min(state.maxEnergy, state.energy + Math.floor(offlineSec*state.regenRate));
   if (offlineSec>5 && state.autoLevel>0) {
