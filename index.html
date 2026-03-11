@@ -42,7 +42,7 @@ body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(c
 .user-rank-pill{font-size:11px;color:var(--ember);font-weight:700;background:rgba(255,77,0,.12);border:1px solid rgba(255,77,0,.3);border-radius:12px;padding:3px 9px}
 
 /* ACTIVE RECIPE BANNER */
-.recipe-banner{display:flex;align-items:center;gap:10px;padding:8px 16px;background:rgba(245,184,46,.05);border-bottom:1px solid rgba(245,184,46,.08)}
+.recipe-banner{display:flex;align-items:center;gap:10px;padding:8px 16px 14px;background:rgba(245,184,46,.05);border-bottom:1px solid rgba(245,184,46,.08);margin-bottom:14px}
 .recipe-banner-icon{font-size:22px}
 .recipe-banner-info{flex:1}
 .recipe-banner-name{font-size:13px;font-weight:800;color:var(--saffron)}
@@ -50,7 +50,7 @@ body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(c
 .recipe-banner-switch{font-size:11px;color:var(--ember);font-weight:700;background:rgba(255,77,0,.1);border:1px solid rgba(255,77,0,.25);border-radius:8px;padding:3px 8px;cursor:pointer}
 
 /* STATS */
-.stats-row{display:flex;gap:8px;padding:12px 16px 8px}
+.stats-row{display:flex;gap:8px;padding:20px 16px 8px;margin-top:20px;border-top:1px solid rgba(245,184,46,.1)}
 .stat-card{flex:1;background:var(--surface);border:1px solid rgba(245,184,46,.1);border-radius:14px;padding:10px;position:relative;overflow:hidden;text-align:center}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--saffron),transparent);opacity:.4}
 .stat-emoji{font-size:18px;line-height:1;margin-bottom:3px;display:block}
@@ -67,7 +67,7 @@ body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(c
 .progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--ember),var(--saffron));box-shadow:0 0 10px rgba(255,100,0,.6);transition:width .5s cubic-bezier(.34,1.56,.64,1)}
 
 /* CLICKER */
-.clicker-zone{display:flex;flex-direction:column;align-items:center;padding:8px 16px 14px;position:relative}
+.clicker-zone{display:flex;flex-direction:column;align-items:center;padding:16px 16px 14px;position:relative}
 .hunger-bar-wrap{width:100%;margin-bottom:14px}
 .hunger-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;font-weight:700}
 .hunger-label span:first-child{color:var(--muted)}
@@ -89,7 +89,7 @@ body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(c
 .combo-display{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--ember);letter-spacing:3px;margin-top:6px;min-height:20px;text-align:center;text-shadow:0 0 12px rgba(255,80,0,.7)}
 
 /* EVENT BADGE */
-.event-badge{margin:0 16px 10px;background:linear-gradient(135deg,rgba(255,77,0,.2),rgba(245,184,46,.12));border:1px solid rgba(245,184,46,.5);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;animation:event-pulse .8s ease-in-out infinite alternate}
+.event-badge{margin:0 16px 14px;background:linear-gradient(135deg,rgba(255,77,0,.2),rgba(245,184,46,.12));border:1px solid rgba(245,184,46,.5);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;animation:event-pulse .8s ease-in-out infinite alternate}
 @keyframes event-pulse{from{box-shadow:0 0 8px rgba(255,77,0,.3)}to{box-shadow:0 0 20px rgba(255,77,0,.7)}}
 .event-badge-icon{font-size:26px}
 .event-badge-text{flex:1}
@@ -98,7 +98,7 @@ body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(c
 .event-badge-btn{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;background:linear-gradient(135deg,var(--ember),var(--saffron));border:none;border-radius:8px;padding:6px 12px;color:var(--bg);cursor:pointer}
 
 /* DAILY BANNER */
-.daily-banner{margin:0 16px 12px;background:linear-gradient(135deg,rgba(255,77,0,.15),rgba(245,184,46,.1));border:1px solid rgba(245,184,46,.3);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.daily-banner{margin:0 16px 14px;background:linear-gradient(135deg,rgba(255,77,0,.15),rgba(245,184,46,.1));border:1px solid rgba(245,184,46,.3);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:12px}
 .daily-banner-icon{font-size:32px}
 .daily-banner-text{flex:1}
 .daily-banner-title{font-weight:800;font-size:14px;color:var(--cream)}
