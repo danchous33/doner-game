@@ -8,414 +8,275 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:       #180d06;
-    --surface:  #261408;
-    --surface2: #321b0c;
-    --ember:    #ff4d00;
-    --saffron:  #f5b82e;
-    --gold:     #ffe082;
-    --sauce:    #c0392b;
-    --green:    #7cb342;
-    --cream:    #fdf3e3;
-    --muted:    #9e7a5a;
-    --text:     #fdf3e3;
-    --glow-fire: 0 0 28px rgba(255,100,0,0.55);
-    --glow-gold: 0 0 20px rgba(245,184,46,0.5);
-  }
+:root {
+  --bg:#180d06; --surface:#261408; --surface2:#321b0c; --surface3:#3e2210;
+  --ember:#ff4d00; --saffron:#f5b82e; --gold:#ffe082;
+  --sauce:#c0392b; --green:#7cb342; --blue:#2196f3; --purple:#9c27b0;
+  --cream:#fdf3e3; --muted:#9e7a5a; --text:#fdf3e3;
+  --glow-gold:0 0 20px rgba(245,184,46,0.5);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden;user-select:none}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(255,80,0,.12) 0%,transparent 55%),radial-gradient(ellipse at 85% 60%,rgba(245,184,46,.07) 0%,transparent 50%),radial-gradient(ellipse at 50% 100%,rgba(180,40,0,.1) 0%,transparent 50%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(245,184,46,.06) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;max-width:420px;margin:0 auto}
 
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid rgba(245,184,46,.12)}
+.shop-brand{display:flex;align-items:center;gap:10px}
+.shop-logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--ember),#c0392b);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 3px 12px rgba(255,80,0,.4);flex-shrink:0}
+.shop-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--saffron);text-shadow:0 0 16px rgba(245,184,46,.5);line-height:1}
+.shop-sub{font-size:11px;color:var(--muted);margin-top:2px;font-weight:600;letter-spacing:.5px}
+.chef-badge{background:linear-gradient(135deg,rgba(245,184,46,.18),rgba(245,184,46,.06));border:1px solid rgba(245,184,46,.4);border-radius:20px;padding:5px 12px;font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--saffron);letter-spacing:1.5px;display:flex;align-items:center;gap:5px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#aaa;transition:background .3s;flex-shrink:0}
+.sync-dot.synced{background:#7cb342;box-shadow:0 0 6px rgba(124,179,66,.6)}
+.sync-dot.syncing{background:var(--saffron);animation:pulse-dot .8s infinite}
+.sync-dot.error{background:var(--sauce)}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    user-select: none;
-  }
+/* USER ROW */
+.user-row{display:flex;align-items:center;gap:10px;padding:10px 16px 8px;background:rgba(245,184,46,.04);border-bottom:1px solid rgba(245,184,46,.08)}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--saffron),var(--ember));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:var(--bg);border:2px solid rgba(245,184,46,.3);flex-shrink:0}
+.user-name{font-size:13px;color:var(--muted);font-weight:600;flex:1}
+.user-name span{color:var(--text);display:block;font-size:14px;font-weight:800}
+.user-rank-pill{font-size:11px;color:var(--ember);font-weight:700;background:rgba(255,77,0,.12);border:1px solid rgba(255,77,0,.3);border-radius:12px;padding:3px 9px}
 
-  body::before {
-    content:'';
-    position:fixed; inset:0;
-    background:
-      radial-gradient(ellipse at 20% 0%,   rgba(255,80,0,0.12) 0%, transparent 55%),
-      radial-gradient(ellipse at 85% 60%,  rgba(245,184,46,0.07) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 100%, rgba(180,40,0,0.1) 0%, transparent 50%);
-    pointer-events:none; z-index:0;
-  }
+/* ACTIVE RECIPE BANNER */
+.recipe-banner{display:flex;align-items:center;gap:10px;padding:8px 16px;background:rgba(245,184,46,.05);border-bottom:1px solid rgba(245,184,46,.08)}
+.recipe-banner-icon{font-size:22px}
+.recipe-banner-info{flex:1}
+.recipe-banner-name{font-size:13px;font-weight:800;color:var(--saffron)}
+.recipe-banner-bonus{font-size:11px;color:var(--muted);font-weight:600}
+.recipe-banner-switch{font-size:11px;color:var(--ember);font-weight:700;background:rgba(255,77,0,.1);border:1px solid rgba(255,77,0,.25);border-radius:8px;padding:3px 8px;cursor:pointer}
 
-  body::after {
-    content:'';
-    position:fixed; inset:0;
-    background-image: radial-gradient(circle, rgba(245,184,46,0.06) 1px, transparent 1px);
-    background-size: 28px 28px;
-    pointer-events:none; z-index:0;
-  }
+/* STATS */
+.stats-row{display:flex;gap:8px;padding:12px 16px 8px}
+.stat-card{flex:1;background:var(--surface);border:1px solid rgba(245,184,46,.1);border-radius:14px;padding:10px;position:relative;overflow:hidden;text-align:center}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--saffron),transparent);opacity:.4}
+.stat-emoji{font-size:18px;line-height:1;margin-bottom:3px;display:block}
+.stat-label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold);margin-top:2px;letter-spacing:1px;text-shadow:0 0 10px rgba(255,224,130,.4)}
+.stat-value.orange{color:var(--ember);text-shadow:0 0 10px rgba(255,77,0,.4)}
 
-  .app { position:relative; z-index:1; max-width:420px; margin:0 auto; }
+/* RANK BAR */
+.rank-section{padding:0 16px 14px}
+.rank-header{display:flex;justify-content:space-between;margin-bottom:6px}
+.rank-left{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.rank-right{font-size:12px;color:var(--saffron);font-weight:800}
+.progress-bar{height:7px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--ember),var(--saffron));box-shadow:0 0 10px rgba(255,100,0,.6);transition:width .5s cubic-bezier(.34,1.56,.64,1)}
 
-  /* HEADER */
-  .header {
-    display:flex; align-items:center; justify-content:space-between;
-    padding: 14px 16px 10px;
-    border-bottom: 1px solid rgba(245,184,46,0.12);
-  }
-  .shop-brand { display:flex; align-items:center; gap:10px; }
-  .shop-logo {
-    width:40px; height:40px; border-radius:10px;
-    background: linear-gradient(135deg, var(--ember), #c0392b);
-    display:flex; align-items:center; justify-content:center;
-    font-size:22px; box-shadow: 0 3px 12px rgba(255,80,0,0.4); flex-shrink:0;
-  }
-  .shop-title {
-    font-family:'Bebas Neue', sans-serif; font-size:20px; letter-spacing:2px;
-    color: var(--saffron); text-shadow: 0 0 16px rgba(245,184,46,0.5); line-height:1;
-  }
-  .shop-sub { font-size:11px; color:var(--muted); margin-top:2px; font-weight:600; letter-spacing:0.5px; }
-  .chef-badge {
-    background: linear-gradient(135deg, rgba(245,184,46,0.18), rgba(245,184,46,0.06));
-    border: 1px solid rgba(245,184,46,0.4);
-    border-radius:20px; padding:5px 12px;
-    font-family:'Bebas Neue', sans-serif; font-size:13px;
-    color: var(--saffron); letter-spacing:1.5px;
-  }
+/* CLICKER */
+.clicker-zone{display:flex;flex-direction:column;align-items:center;padding:8px 16px 14px;position:relative}
+.hunger-bar-wrap{width:100%;margin-bottom:14px}
+.hunger-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;font-weight:700}
+.hunger-label span:first-child{color:var(--muted)}
+.hunger-label span:last-child{color:var(--saffron)}
+.hunger-bar{height:9px;background:var(--surface2);border-radius:5px;overflow:hidden}
+.hunger-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--sauce),var(--ember),var(--saffron));box-shadow:0 0 12px rgba(255,77,0,.5);transition:width .3s ease}
+.doner-wrap{position:relative;margin:4px 0}
+.fire-glow{position:absolute;inset:-30px;border-radius:50%;background:radial-gradient(circle,rgba(255,100,0,.2) 0%,rgba(255,50,0,.08) 40%,transparent 70%);animation:fire-pulse 1.5s ease-in-out infinite;pointer-events:none}
+@keyframes fire-pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.12);opacity:1}}
+.doner-btn{width:230px;height:230px;border-radius:50%;background:radial-gradient(circle at 38% 38%,rgba(255,200,100,.18) 0%,transparent 55%),conic-gradient(from 0deg,#3d1a08,#5c2a0e,#7a3a14,#5c2a0e,#3d1a08);border:3px solid rgba(245,184,46,.45);cursor:pointer;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(255,100,0,.35),0 0 80px rgba(255,100,0,.12),inset 0 0 30px rgba(255,150,50,.1);transition:transform .08s ease,box-shadow .08s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;touch-action:manipulation}
+.doner-btn:active{transform:scale(.92);box-shadow:0 0 60px rgba(255,130,0,.7),inset 0 0 40px rgba(255,150,50,.25)}
+.doner-icon{font-size:82px;line-height:1;filter:drop-shadow(0 0 14px rgba(255,180,50,.7));animation:doner-sway 3s ease-in-out infinite;pointer-events:none}
+@keyframes doner-sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.doner-recipe-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--saffron);opacity:.8;pointer-events:none}
+.doner-tap-text{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--saffron);opacity:.75;pointer-events:none}
+.float-num{position:fixed;font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);pointer-events:none;z-index:999;text-shadow:0 0 12px rgba(255,200,50,.8);letter-spacing:1px;animation:float-up .85s ease forwards}
+.float-num.crit{font-size:30px;color:var(--ember);text-shadow:0 0 16px rgba(255,80,0,.9)}
+@keyframes float-up{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-90px) scale(.6)}}
+.combo-display{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--ember);letter-spacing:3px;margin-top:6px;min-height:20px;text-align:center;text-shadow:0 0 12px rgba(255,80,0,.7)}
 
-  /* SYNC STATUS */
-  .sync-dot {
-    width:8px; height:8px; border-radius:50%;
-    background:#aaa; display:inline-block; margin-right:4px;
-    transition: background 0.3s;
-  }
-  .sync-dot.synced  { background:#7cb342; box-shadow:0 0 6px rgba(124,179,66,0.6); }
-  .sync-dot.syncing { background:var(--saffron); animation: pulse-dot 0.8s infinite; }
-  .sync-dot.error   { background:var(--sauce); }
-  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+/* EVENT BADGE */
+.event-badge{margin:0 16px 10px;background:linear-gradient(135deg,rgba(255,77,0,.2),rgba(245,184,46,.12));border:1px solid rgba(245,184,46,.5);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;animation:event-pulse .8s ease-in-out infinite alternate}
+@keyframes event-pulse{from{box-shadow:0 0 8px rgba(255,77,0,.3)}to{box-shadow:0 0 20px rgba(255,77,0,.7)}}
+.event-badge-icon{font-size:26px}
+.event-badge-text{flex:1}
+.event-badge-title{font-weight:800;font-size:13px;color:var(--saffron)}
+.event-badge-sub{font-size:11px;color:var(--muted);font-weight:600}
+.event-badge-btn{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;background:linear-gradient(135deg,var(--ember),var(--saffron));border:none;border-radius:8px;padding:6px 12px;color:var(--bg);cursor:pointer}
 
-  /* USER ROW */
-  .user-row {
-    display:flex; align-items:center; gap:10px;
-    padding: 10px 16px 8px;
-    background: rgba(245,184,46,0.04);
-    border-bottom: 1px solid rgba(245,184,46,0.08);
-  }
-  .user-avatar {
-    width:32px; height:32px; border-radius:50%;
-    background: linear-gradient(135deg, var(--saffron), var(--ember));
-    display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:12px; color:var(--bg);
-    border: 2px solid rgba(245,184,46,0.3); flex-shrink:0;
-  }
-  .user-name { font-size:13px; color:var(--muted); font-weight:600; flex:1; }
-  .user-name span { color:var(--text); display:block; font-size:14px; font-weight:800; }
-  .user-rank-pill {
-    font-size:11px; color:var(--ember); font-weight:700;
-    background: rgba(255,77,0,0.12); border:1px solid rgba(255,77,0,0.3);
-    border-radius:12px; padding:3px 9px;
-  }
+/* DAILY BANNER */
+.daily-banner{margin:0 16px 12px;background:linear-gradient(135deg,rgba(255,77,0,.15),rgba(245,184,46,.1));border:1px solid rgba(245,184,46,.3);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.daily-banner-icon{font-size:32px}
+.daily-banner-text{flex:1}
+.daily-banner-title{font-weight:800;font-size:14px;color:var(--cream)}
+.daily-banner-sub{font-size:11px;color:var(--muted);font-weight:600;margin-top:1px}
+.daily-btn{background:linear-gradient(135deg,var(--ember),var(--saffron));border:none;border-radius:10px;padding:8px 14px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--bg);cursor:pointer;flex-shrink:0;box-shadow:0 4px 14px rgba(255,100,0,.4);transition:transform .1s}
+.daily-btn:active{transform:scale(.95)}
 
-  /* STATS */
-  .stats-row { display:flex; gap:8px; padding:12px 16px 8px; }
-  .stat-card {
-    flex:1; background:var(--surface);
-    border:1px solid rgba(245,184,46,0.1);
-    border-radius:14px; padding:10px 10px;
-    position:relative; overflow:hidden; text-align:center;
-  }
-  .stat-card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:2px;
-    background: linear-gradient(90deg, transparent, var(--saffron), transparent); opacity:0.4;
-  }
-  .stat-emoji { font-size:18px; line-height:1; margin-bottom:3px; display:block; }
-  .stat-label { font-size:9px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; font-weight:700; }
-  .stat-value {
-    font-family:'Bebas Neue', sans-serif; font-size:18px;
-    color:var(--gold); margin-top:2px; letter-spacing:1px;
-    text-shadow: 0 0 10px rgba(255,224,130,0.4);
-  }
-  .stat-value.orange { color:var(--ember); text-shadow: 0 0 10px rgba(255,77,0,0.4); }
+/* TABS */
+.tabs{display:flex;border-top:2px solid rgba(245,184,46,.15);border-bottom:1px solid rgba(245,184,46,.08);background:var(--surface);position:sticky;top:0;z-index:10}
+.tab{flex:1;padding:9px 0;text-align:center;cursor:pointer;font-size:9px;text-transform:uppercase;letter-spacing:.8px;font-weight:800;color:var(--muted);border-bottom:3px solid transparent;transition:all .2s}
+.tab.active{color:var(--saffron);border-bottom-color:var(--ember);background:rgba(245,184,46,.05)}
+.tab-icon{font-size:16px;display:block;margin-bottom:2px}
 
-  /* RANK BAR */
-  .rank-section { padding:0 16px 14px; }
-  .rank-header { display:flex; justify-content:space-between; margin-bottom:6px; }
-  .rank-left { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-weight:700; }
-  .rank-right { font-size:12px; color:var(--saffron); font-weight:800; }
-  .progress-bar { height:7px; background:var(--surface2); border-radius:4px; overflow:hidden; }
-  .progress-fill {
-    height:100%; border-radius:4px;
-    background: linear-gradient(90deg, var(--ember), var(--saffron));
-    box-shadow: 0 0 10px rgba(255,100,0,0.6);
-    transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
-  }
+/* PANELS */
+.panel{display:none;padding:16px}
+.panel.active{display:block}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(245,184,46,.4),transparent)}
 
-  /* CLICKER ZONE */
-  .clicker-zone {
-    display:flex; flex-direction:column; align-items:center;
-    padding:8px 16px 14px; position:relative;
-  }
+/* UPGRADES */
+.upgrade-grid{display:flex;flex-direction:column;gap:10px}
+.upgrade-section-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:8px 0 4px;padding-left:4px}
+.upgrade-card{background:var(--surface);border:1px solid rgba(245,184,46,.1);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.upgrade-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;border-radius:3px 0 0 3px;transition:background .2s}
+.upgrade-card.affordable{border-color:rgba(245,184,46,.35)}
+.upgrade-card.affordable::before{background:linear-gradient(180deg,var(--saffron),var(--ember))}
+.upgrade-card.affordable:active{transform:scale(.98);background:rgba(245,184,46,.04)}
+.upgrade-card.maxed{border-color:rgba(124,179,66,.4)}
+.upgrade-card.maxed::before{background:var(--green)}
+.upgrade-card.cant-afford{opacity:.45;cursor:not-allowed}
+.upgrade-card.locked{opacity:.3;cursor:not-allowed}
+.upgrade-icon{font-size:34px;flex-shrink:0}
+.upgrade-info{flex:1}
+.upgrade-name{font-weight:800;font-size:15px;margin-bottom:2px;color:var(--cream)}
+.upgrade-desc{font-size:12px;color:var(--muted);font-weight:600}
+.upgrade-level{font-size:11px;color:var(--saffron);margin-top:3px;font-weight:700}
+.upgrade-cost{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);text-align:right;flex-shrink:0;letter-spacing:1px}
+.upgrade-cost small{display:block;font-size:10px;color:var(--muted);font-family:'Nunito';letter-spacing:.5px;font-weight:700}
 
-  .hunger-bar-wrap { width:100%; margin-bottom:14px; }
-  .hunger-label {
-    display:flex; justify-content:space-between;
-    font-size:11px; margin-bottom:5px; font-weight:700;
-  }
-  .hunger-label span:first-child { color:var(--muted); }
-  .hunger-label span:last-child { color:var(--saffron); }
-  .hunger-bar { height:9px; background:var(--surface2); border-radius:5px; overflow:hidden; }
-  .hunger-fill {
-    height:100%; border-radius:5px;
-    background: linear-gradient(90deg, var(--sauce), var(--ember), var(--saffron));
-    box-shadow: 0 0 12px rgba(255,77,0,0.5);
-    transition: width 0.3s ease;
-  }
+/* RECIPE TREE */
+.recipe-tree{display:flex;flex-direction:column;gap:12px}
+.recipe-path{display:flex;align-items:center;gap:0;margin-bottom:4px;overflow-x:auto;padding-bottom:6px}
+.recipe-path::-webkit-scrollbar{height:3px}
+.recipe-path::-webkit-scrollbar-thumb{background:rgba(245,184,46,.3);border-radius:3px}
+.recipe-node{display:flex;flex-direction:column;align-items:center;min-width:70px}
+.recipe-dot{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid rgba(245,184,46,.2);background:var(--surface2);position:relative;cursor:pointer;transition:all .2s;flex-shrink:0}
+.recipe-dot.unlocked{border-color:var(--saffron);background:rgba(245,184,46,.12);box-shadow:0 0 12px rgba(245,184,46,.3)}
+.recipe-dot.active{border-color:var(--ember);background:rgba(255,77,0,.2);box-shadow:0 0 18px rgba(255,77,0,.5);animation:recipe-active-pulse 1.5s infinite}
+@keyframes recipe-active-pulse{0%,100%{box-shadow:0 0 12px rgba(255,77,0,.4)}50%{box-shadow:0 0 24px rgba(255,77,0,.8)}}
+.recipe-dot.locked-node{opacity:.35}
+.recipe-dot-label{font-size:9px;color:var(--muted);font-weight:700;margin-top:4px;text-align:center;letter-spacing:.5px;max-width:70px}
+.recipe-connector{width:24px;height:2px;background:rgba(245,184,46,.2);flex-shrink:0;margin-top:-18px}
+.recipe-connector.lit{background:linear-gradient(90deg,var(--saffron),var(--ember))}
+.recipe-card{background:var(--surface);border:1px solid rgba(245,184,46,.1);border-radius:16px;padding:16px}
+.recipe-card.active-recipe{border-color:rgba(255,77,0,.5);background:rgba(255,77,0,.04)}
+.recipe-card-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.recipe-card-icon{font-size:36px}
+.recipe-card-title{flex:1}
+.recipe-card-name{font-weight:800;font-size:16px;color:var(--cream)}
+.recipe-card-sub{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px}
+.recipe-bonuses{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.recipe-bonus-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;background:rgba(245,184,46,.1);border:1px solid rgba(245,184,46,.25);color:var(--saffron)}
+.recipe-bonus-pill.active-pill{background:rgba(255,77,0,.15);border-color:rgba(255,77,0,.4);color:var(--ember)}
+.recipe-action-btn{width:100%;padding:11px;border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.recipe-action-btn.buy-btn{background:linear-gradient(135deg,var(--ember),var(--saffron));color:var(--bg);box-shadow:0 4px 14px rgba(255,100,0,.3)}
+.recipe-action-btn.buy-btn:active{transform:scale(.97)}
+.recipe-action-btn.use-btn{background:transparent;border:1px solid var(--ember);color:var(--ember)}
+.recipe-action-btn.active-btn{background:rgba(124,179,66,.15);border:1px solid rgba(124,179,66,.4);color:var(--green);cursor:default}
+.recipe-action-btn.locked-btn{background:var(--surface2);color:var(--muted);cursor:not-allowed;opacity:.5}
 
-  .doner-wrap { position:relative; margin:4px 0 4px; }
+/* LEADERBOARD */
+.leaderboard{display:flex;flex-direction:column;gap:8px}
+.lb-loading{text-align:center;padding:30px;font-size:13px;color:var(--muted);font-weight:700}
+.lb-loading-spinner{font-size:30px;display:block;margin-bottom:10px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.leader-item{background:var(--surface);border:1px solid rgba(245,184,46,.08);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:12px}
+.leader-item.me{border-color:rgba(245,184,46,.45);background:rgba(245,184,46,.05)}
+.leader-item.top1{border-color:rgba(255,215,0,.5);background:rgba(255,215,0,.04)}
+.leader-item.top2{border-color:rgba(192,192,192,.35)}
+.leader-item.top3{border-color:rgba(205,127,50,.35)}
+.leader-rank{font-family:'Bebas Neue',sans-serif;font-size:20px;width:30px;text-align:center;flex-shrink:0;letter-spacing:1px}
+.rank-1{color:var(--gold);text-shadow:0 0 10px rgba(255,215,0,.6)}
+.rank-2{color:#c0c0c0}
+.rank-3{color:#cd7f32}
+.rank-other{color:var(--muted);font-size:14px}
+.leader-avatar{width:38px;height:38px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--saffron),var(--ember));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--bg)}
+.leader-name{flex:1}
+.leader-name strong{display:block;font-size:14px;font-weight:800;color:var(--cream)}
+.leader-name span{font-size:11px;color:var(--muted);font-weight:600}
+.leader-score{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold);text-align:right;letter-spacing:1px}
+.leader-score small{display:block;font-size:10px;color:var(--muted);font-family:'Nunito';font-weight:700}
+.refresh-btn{width:100%;margin-top:12px;padding:12px;background:transparent;border:1px solid rgba(245,184,46,.25);border-radius:14px;color:var(--saffron);font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.refresh-btn:active{background:rgba(245,184,46,.08)}
 
-  .fire-glow {
-    position:absolute; inset:-30px;
-    border-radius:50%;
-    background: radial-gradient(circle, rgba(255,100,0,0.2) 0%, rgba(255,50,0,0.08) 40%, transparent 70%);
-    animation: fire-pulse 1.5s ease-in-out infinite;
-    pointer-events:none;
-  }
-  @keyframes fire-pulse {
-    0%,100% { transform:scale(1); opacity:0.6; }
-    50%      { transform:scale(1.12); opacity:1; }
-  }
+/* BATTLE PASS */
+.bp-header{background:linear-gradient(135deg,rgba(156,39,176,.2),rgba(255,77,0,.15));border:1px solid rgba(156,39,176,.4);border-radius:16px;padding:14px;margin-bottom:16px}
+.bp-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.bp-season{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:#ce93d8}
+.bp-days{font-size:11px;color:var(--muted);font-weight:700}
+.bp-progress-bar{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.bp-progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#9c27b0,#e91e63);box-shadow:0 0 10px rgba(156,39,176,.5);transition:width .5s ease}
+.bp-stats{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700}
+.bp-stats span{color:var(--saffron)}
+.bp-grid{display:flex;flex-direction:column;gap:10px}
+.bp-task{background:var(--surface);border:1px solid rgba(245,184,46,.08);border-radius:14px;padding:13px 14px;position:relative;overflow:hidden}
+.bp-task.today{border-color:rgba(245,184,46,.4);background:rgba(245,184,46,.03)}
+.bp-task.completed{border-color:rgba(124,179,66,.35)}
+.bp-task.future{opacity:.45}
+.bp-task-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.bp-task-left{display:flex;align-items:center;gap:9px}
+.bp-day-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--muted);letter-spacing:1px;min-width:28px}
+.bp-day-num.active-day{color:var(--saffron)}
+.bp-day-num.done-day{color:var(--green)}
+.bp-task-name{font-weight:800;font-size:14px;color:var(--cream)}
+.bp-task-sub{font-size:11px;color:var(--muted);font-weight:600;margin-top:1px}
+.bp-reward{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--gold);letter-spacing:1px}
+.bp-bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.bp-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#9c27b0,var(--saffron));transition:width .4s ease}
+.bp-claim-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;background:linear-gradient(135deg,var(--ember),var(--saffron));border:none;border-radius:8px;padding:6px 11px;color:var(--bg);cursor:pointer}
+.bp-done-stamp{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:20px}
 
-  .doner-btn {
-    width:230px; height:230px; border-radius:50%;
-    background:
-      radial-gradient(circle at 38% 38%, rgba(255,200,100,0.18) 0%, transparent 55%),
-      conic-gradient(from 0deg, #3d1a08, #5c2a0e, #7a3a14, #5c2a0e, #3d1a08);
-    border: 3px solid rgba(245,184,46,0.45);
-    cursor:pointer; position:relative; overflow:hidden;
-    box-shadow:
-      0 0 40px rgba(255,100,0,0.35),
-      0 0 80px rgba(255,100,0,0.12),
-      inset 0 0 30px rgba(255,150,50,0.1);
-    transition: transform 0.08s ease, box-shadow 0.08s ease;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-  .doner-btn:active {
-    transform:scale(0.92);
-    box-shadow:
-      0 0 60px rgba(255,130,0,0.7),
-      inset 0 0 40px rgba(255,150,50,0.25);
-  }
+/* TASKS PANEL */
+.challenge-card{background:var(--surface);border:1px solid rgba(255,77,0,.2);border-radius:16px;padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden}
+.challenge-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.challenge-name{font-weight:800;font-size:15px;color:var(--cream)}
+.challenge-reward{color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px}
+.challenge-progress{font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:700}
+.ch-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.ch-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--sauce),var(--ember),var(--saffron));transition:width .5s ease}
+.task-done-stamp{position:absolute;top:10px;right:10px;font-size:22px}
 
-  .doner-icon {
-    font-size:82px; line-height:1;
-    filter: drop-shadow(0 0 14px rgba(255,180,50,0.7));
-    animation: doner-sway 3s ease-in-out infinite;
-    pointer-events:none;
-  }
-  @keyframes doner-sway {
-    0%,100% { transform:rotate(-4deg); }
-    50%      { transform:rotate(4deg); }
-  }
-  .doner-tap-text {
-    font-family:'Bebas Neue', sans-serif; font-size:13px; letter-spacing:3px;
-    color:var(--saffron); opacity:0.75; text-transform:uppercase;
-    pointer-events:none;
-  }
+/* EVENT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid rgba(245,184,46,.35);border-radius:22px;padding:24px;max-width:340px;width:100%;text-align:center;transform:scale(.85);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal-icon{font-size:60px;margin-bottom:12px;display:block;animation:modal-bounce .6s ease}
+@keyframes modal-bounce{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--saffron);margin-bottom:6px}
+.modal-desc{font-size:14px;color:var(--muted);font-weight:600;line-height:1.5;margin-bottom:18px}
+.modal-timer{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--ember);letter-spacing:2px;margin-bottom:14px}
+.modal-btns{display:flex;gap:10px}
+.modal-btn{flex:1;padding:13px;border:none;border-radius:13px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;cursor:pointer;transition:all .15s}
+.modal-btn:active{transform:scale(.96)}
+.modal-btn.primary{background:linear-gradient(135deg,var(--ember),var(--saffron));color:var(--bg);box-shadow:0 4px 14px rgba(255,100,0,.35)}
+.modal-btn.secondary{background:var(--surface2);color:var(--muted);border:1px solid rgba(245,184,46,.2)}
 
-  /* FLOAT NUMBERS */
-  .float-num {
-    position:fixed; font-family:'Bebas Neue', sans-serif;
-    font-size:24px; color:var(--gold); pointer-events:none; z-index:999;
-    text-shadow: 0 0 12px rgba(255,200,50,0.8); letter-spacing:1px;
-    animation: float-up 0.85s ease forwards;
-  }
-  .float-num.crit { font-size:30px; color:var(--ember); text-shadow: 0 0 16px rgba(255,80,0,0.9); }
-  @keyframes float-up {
-    0%   { opacity:1; transform:translateY(0) scale(1); }
-    100% { opacity:0; transform:translateY(-90px) scale(0.6); }
-  }
+/* EFFECT OVERLAY */
+.effect-overlay{position:fixed;inset:0;pointer-events:none;z-index:50;transition:background .5s}
+.effect-overlay.fire{background:rgba(255,80,0,.08);animation:fire-flicker .3s infinite}
+@keyframes fire-flicker{0%,100%{background:rgba(255,80,0,.06)}50%{background:rgba(255,80,0,.14)}}
+.effect-overlay.police{background:rgba(0,80,255,.06);animation:police-flash .5s infinite}
+@keyframes police-flash{0%,100%{background:rgba(0,80,255,.04)}50%{background:rgba(255,0,0,.04)}}
 
-  .combo-display {
-    font-family:'Bebas Neue', sans-serif; font-size:14px;
-    color:var(--ember); letter-spacing:3px; margin-top:6px;
-    min-height:20px; text-align:center;
-    text-shadow: 0 0 12px rgba(255,80,0,0.7);
-  }
-
-  /* TABS */
-  .tabs {
-    display:flex;
-    border-top: 2px solid rgba(245,184,46,0.15);
-    border-bottom: 1px solid rgba(245,184,46,0.08);
-    background: var(--surface);
-    position:sticky; top:0; z-index:10;
-  }
-  .tab {
-    flex:1; padding:11px 0; text-align:center; cursor:pointer;
-    font-size:10px; text-transform:uppercase; letter-spacing:1px; font-weight:800;
-    color:var(--muted); border-bottom:3px solid transparent; transition:all 0.2s;
-  }
-  .tab.active { color:var(--saffron); border-bottom-color:var(--ember); background: rgba(245,184,46,0.05); }
-  .tab-icon { font-size:17px; display:block; margin-bottom:2px; }
-
-  /* PANELS */
-  .panel { display:none; padding:16px; }
-  .panel.active { display:block; }
-
-  .section-title {
-    font-family:'Bebas Neue', sans-serif; font-size:16px; color:var(--muted);
-    letter-spacing:3px; text-transform:uppercase; margin-bottom:14px;
-    display:flex; align-items:center; gap:10px;
-  }
-  .section-title::after {
-    content:''; flex:1; height:1px;
-    background: linear-gradient(90deg, rgba(245,184,46,0.4), transparent);
-  }
-
-  /* UPGRADES */
-  .upgrade-grid { display:flex; flex-direction:column; gap:10px; }
-  .upgrade-card {
-    background: var(--surface); border: 1px solid rgba(245,184,46,0.1);
-    border-radius:16px; padding:14px 16px;
-    display:flex; align-items:center; gap:14px;
-    cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden;
-  }
-  .upgrade-card::before {
-    content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
-    background:transparent; border-radius:3px 0 0 3px; transition:background 0.2s;
-  }
-  .upgrade-card.affordable { border-color:rgba(245,184,46,0.35); }
-  .upgrade-card.affordable::before { background: linear-gradient(180deg, var(--saffron), var(--ember)); }
-  .upgrade-card.affordable:active { transform:scale(0.98); background:rgba(245,184,46,0.04); }
-  .upgrade-card.maxed { border-color:rgba(124,179,66,0.4); }
-  .upgrade-card.maxed::before { background:var(--green); }
-  .upgrade-card.cant-afford { opacity:0.45; cursor:not-allowed; }
-  .upgrade-icon { font-size:34px; flex-shrink:0; }
-  .upgrade-info { flex:1; }
-  .upgrade-name { font-weight:800; font-size:15px; margin-bottom:2px; color:var(--cream); }
-  .upgrade-desc { font-size:12px; color:var(--muted); font-weight:600; }
-  .upgrade-level { font-size:11px; color:var(--saffron); margin-top:3px; font-weight:700; }
-  .upgrade-cost {
-    font-family:'Bebas Neue', sans-serif; font-size:16px;
-    color:var(--gold); text-align:right; flex-shrink:0; letter-spacing:1px;
-  }
-  .upgrade-cost small { display:block; font-size:10px; color:var(--muted); font-family:'Nunito'; letter-spacing:0.5px; font-weight:700; }
-  .upgrade-cost.maxed-label { color:var(--green); font-size:13px; }
-
-  /* LEADERBOARD */
-  .leaderboard { display:flex; flex-direction:column; gap:8px; }
-  .lb-loading {
-    text-align:center; padding:30px;
-    font-size:13px; color:var(--muted); font-weight:700;
-  }
-  .lb-loading-spinner {
-    font-size:30px; display:block; margin-bottom:10px;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin { to { transform:rotate(360deg); } }
-
-  .leader-item {
-    background:var(--surface); border:1px solid rgba(245,184,46,0.08);
-    border-radius:14px; padding:11px 14px;
-    display:flex; align-items:center; gap:12px;
-  }
-  .leader-item.me    { border-color:rgba(245,184,46,0.45); background:rgba(245,184,46,0.05); }
-  .leader-item.top1  { border-color:rgba(255,215,0,0.5);  background:rgba(255,215,0,0.04);  }
-  .leader-item.top2  { border-color:rgba(192,192,192,0.35); }
-  .leader-item.top3  { border-color:rgba(205,127,50,0.35); }
-  .leader-rank {
-    font-family:'Bebas Neue', sans-serif; font-size:20px;
-    width:30px; text-align:center; flex-shrink:0; letter-spacing:1px;
-  }
-  .rank-1 { color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.6); }
-  .rank-2 { color:#c0c0c0; }
-  .rank-3 { color:#cd7f32; }
-  .rank-other { color:var(--muted); font-size:14px; }
-  .leader-avatar {
-    width:38px; height:38px; border-radius:50%; flex-shrink:0;
-    background: linear-gradient(135deg, var(--saffron), var(--ember));
-    display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:14px; color:var(--bg);
-  }
-  .leader-name { flex:1; }
-  .leader-name strong { display:block; font-size:14px; font-weight:800; color:var(--cream); }
-  .leader-name span   { font-size:11px; color:var(--muted); font-weight:600; }
-  .leader-score {
-    font-family:'Bebas Neue', sans-serif; font-size:15px;
-    color:var(--gold); text-align:right; letter-spacing:1px;
-  }
-  .leader-score small { display:block; font-size:10px; color:var(--muted); font-family:'Nunito'; font-weight:700; }
-
-  .refresh-btn {
-    width:100%; margin-top:12px; padding:12px;
-    background:transparent; border:1px solid rgba(245,184,46,0.25);
-    border-radius:14px; color:var(--saffron);
-    font-family:'Bebas Neue', sans-serif; font-size:14px;
-    letter-spacing:2px; cursor:pointer; transition:all 0.2s;
-  }
-  .refresh-btn:active { background:rgba(245,184,46,0.08); }
-
-  /* TASKS */
-  .challenge-card {
-    background:var(--surface); border:1px solid rgba(255,77,0,0.2);
-    border-radius:16px; padding:14px 16px; margin-bottom:10px;
-    position:relative; overflow:hidden;
-  }
-  .challenge-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-  .challenge-name { font-weight:800; font-size:15px; color:var(--cream); }
-  .challenge-reward { color:var(--gold); font-family:'Bebas Neue', sans-serif; font-size:14px; letter-spacing:1px; }
-  .challenge-progress { font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:700; }
-  .ch-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; }
-  .ch-fill {
-    height:100%; border-radius:3px;
-    background: linear-gradient(90deg, var(--sauce), var(--ember), var(--saffron));
-    transition:width 0.5s ease;
-  }
-  .task-done-stamp { position:absolute; top:10px; right:10px; font-size:22px; }
-
-  /* DAILY BANNER */
-  .daily-banner {
-    margin: 0 16px 12px;
-    background: linear-gradient(135deg, rgba(255,77,0,0.15), rgba(245,184,46,0.1));
-    border: 1px solid rgba(245,184,46,0.3);
-    border-radius:16px; padding:12px 16px;
-    display:flex; align-items:center; gap:12px;
-  }
-  .daily-banner-icon { font-size:32px; }
-  .daily-banner-text { flex:1; }
-  .daily-banner-title { font-weight:800; font-size:14px; color:var(--cream); }
-  .daily-banner-sub { font-size:11px; color:var(--muted); font-weight:600; margin-top:1px; }
-  .daily-btn {
-    background: linear-gradient(135deg, var(--ember), var(--saffron));
-    border:none; border-radius:10px; padding:8px 14px;
-    font-family:'Bebas Neue', sans-serif; font-size:13px; letter-spacing:1px;
-    color:var(--bg); cursor:pointer; flex-shrink:0;
-    box-shadow: 0 4px 14px rgba(255,100,0,0.4); transition:transform 0.1s;
-  }
-  .daily-btn:active { transform:scale(0.95); }
-
-  /* TOAST */
-  .toast {
-    position:fixed; top:20px; left:50%;
-    transform:translateX(-50%) translateY(-90px);
-    background:var(--surface2); border:1px solid rgba(245,184,46,0.45);
-    border-radius:14px; padding:10px 20px;
-    font-size:13px; font-weight:800; color:var(--saffron);
-    z-index:9999; transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    white-space:nowrap; box-shadow:var(--glow-gold);
-  }
-  .toast.show { transform:translateX(-50%) translateY(0); }
-
-  @keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-4deg)} 75%{transform:rotate(4deg)} }
-  .shake { animation:shake 0.2s ease; }
-
-  .particles-canvas { position:fixed; inset:0; pointer-events:none; z-index:998; }
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-90px);background:var(--surface2);border:1px solid rgba(245,184,46,.45);border-radius:14px;padding:10px 20px;font-size:13px;font-weight:800;color:var(--saffron);z-index:9999;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:var(--glow-gold)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+.shake{animation:shake .2s ease}
+.particles-canvas{position:fixed;inset:0;pointer-events:none;z-index:998}
 </style>
 </head>
 <body>
 <canvas class="particles-canvas" id="canvas"></canvas>
-<div class="app">
+<div class="effect-overlay" id="effectOverlay"></div>
 
+<!-- EVENT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleModalOutside(event)">
+  <div class="modal" id="modal">
+    <span class="modal-icon" id="modalIcon">🎉</span>
+    <div class="modal-title" id="modalTitle">Событие</div>
+    <div class="modal-desc" id="modalDesc">Описание</div>
+    <div class="modal-timer" id="modalTimer"></div>
+    <div class="modal-btns" id="modalBtns"></div>
+  </div>
+</div>
+
+<div class="app">
   <div class="header">
     <div class="shop-brand">
       <div class="shop-logo">🥙</div>
@@ -437,6 +298,17 @@
     </div>
     <div class="user-rank-pill" id="rank-pill">Новичок</div>
   </div>
+
+  <div class="recipe-banner" id="recipe-banner">
+    <div class="recipe-banner-icon" id="rb-icon">🥙</div>
+    <div class="recipe-banner-info">
+      <div class="recipe-banner-name" id="rb-name">Классический донер</div>
+      <div class="recipe-banner-bonus" id="rb-bonus">Базовый рецепт</div>
+    </div>
+    <div class="recipe-banner-switch" onclick="switchTab('recipes')">РЕЦЕПТЫ</div>
+  </div>
+
+  <div id="event-badge-wrap"></div>
 
   <div class="daily-banner" id="daily-banner">
     <div class="daily-banner-icon">🎁</div>
@@ -470,9 +342,7 @@
       <span class="rank-left">📍 Статус</span>
       <span class="rank-right" id="rank-name">Голодный студент</span>
     </div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="rank-progress" style="width:0%"></div>
-    </div>
+    <div class="progress-bar"><div class="progress-fill" id="rank-progress" style="width:0%"></div></div>
   </div>
 
   <div class="clicker-zone">
@@ -481,32 +351,25 @@
         <span>🌶️ Аппетит посетителей</span>
         <span id="hunger-text">1000 / 1000</span>
       </div>
-      <div class="hunger-bar">
-        <div class="hunger-fill" id="hunger-fill" style="width:100%"></div>
-      </div>
+      <div class="hunger-bar"><div class="hunger-fill" id="hunger-fill" style="width:100%"></div></div>
     </div>
-
     <div class="doner-wrap">
       <div class="fire-glow"></div>
       <div class="doner-btn" id="donerBtn" onclick="handleTap(event)">
-        <div class="doner-icon">🥙</div>
+        <div class="doner-icon" id="doner-icon">🥙</div>
+        <div class="doner-recipe-label" id="doner-recipe-label"></div>
         <div class="doner-tap-text">НАРЕЗАЙ</div>
       </div>
     </div>
-
     <div class="combo-display" id="combo-display"></div>
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('upgrades')">
-      <span class="tab-icon">⚙️</span>Кухня
-    </div>
-    <div class="tab" onclick="switchTab('leaderboard')">
-      <span class="tab-icon">🏆</span>Рейтинг
-    </div>
-    <div class="tab" onclick="switchTab('tasks')">
-      <span class="tab-icon">📋</span>Заказы
-    </div>
+    <div class="tab active" onclick="switchTab('upgrades')"><span class="tab-icon">⚙️</span>Кухня</div>
+    <div class="tab" onclick="switchTab('recipes')"><span class="tab-icon">📜</span>Рецепты</div>
+    <div class="tab" onclick="switchTab('battlepass')"><span class="tab-icon">🏆</span>Пропуск</div>
+    <div class="tab" onclick="switchTab('leaderboard')"><span class="tab-icon">🌍</span>Топ</div>
+    <div class="tab" onclick="switchTab('tasks')"><span class="tab-icon">📋</span>Заказы</div>
   </div>
 
   <div class="panel active" id="panel-upgrades">
@@ -514,13 +377,28 @@
     <div class="upgrade-grid" id="upgrade-grid"></div>
   </div>
 
-  <div class="panel" id="panel-leaderboard">
-    <div class="section-title">🏆 Лучшие Едоки</div>
-    <div class="leaderboard" id="leaderboard">
-      <div class="lb-loading">
-        <span class="lb-loading-spinner">🥙</span>
-        Загружаем рейтинг...
+  <div class="panel" id="panel-recipes">
+    <div class="section-title">📜 Дерево Рецептов</div>
+    <div class="recipe-tree" id="recipe-tree"></div>
+  </div>
+
+  <div class="panel" id="panel-battlepass">
+    <div class="section-title">🏆 Боевой Пропуск</div>
+    <div class="bp-header">
+      <div class="bp-header-row">
+        <div class="bp-season">🌶️ Сезон: Острый Восток</div>
+        <div class="bp-days" id="bp-days">День <span id="bp-current-day">1</span> / 30</div>
       </div>
+      <div class="bp-progress-bar"><div class="bp-progress-fill" id="bp-progress-fill" style="width:0%"></div></div>
+      <div class="bp-stats">Выполнено заданий: <span id="bp-done-count">0</span> / 30</div>
+    </div>
+    <div class="bp-grid" id="bp-grid"></div>
+  </div>
+
+  <div class="panel" id="panel-leaderboard">
+    <div class="section-title">🌍 Лучшие Едоки</div>
+    <div class="leaderboard" id="leaderboard">
+      <div class="lb-loading"><span class="lb-loading-spinner">🥙</span>Загружаем рейтинг...</div>
     </div>
     <button class="refresh-btn" onclick="loadLeaderboard()">↻ ОБНОВИТЬ РЕЙТИНГ</button>
   </div>
@@ -529,358 +407,542 @@
     <div class="section-title">📋 Заказы Дня</div>
     <div id="tasks-list"></div>
   </div>
-
-  <!-- VERSION TAG -->
-  <div style="text-align:center;padding:14px 0 20px;font-size:10px;color:rgba(158,122,90,0.35);letter-spacing:2px;font-family:'Nunito',sans-serif;user-select:none;">
-    ДОНЕРНАЯ АХМЕДА · v1.2
-  </div>
-
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════
-//   ⚙️  НАСТРОЙКА SUPABASE
-//   Замени эти две строки своими данными из Supabase → Settings → API
-// ═══════════════════════════════════════
-const SUPABASE_URL  = 'https://lxbjtqzfcwcbeteimzos.supabase.co';      // ← вставь сюда
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4Ymp0cXpmY3djYmV0ZWltem9zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMzU1MTQsImV4cCI6MjA4ODgxMTUxNH0.nDKvv0LDd4Fa_hmuNPdSTanyXNC0WQmEklm-OPUQ6_M'; // ← вставь сюда
-
+// ════════════════════════════════════════════
+//  ⚙️  НАСТРОЙКА SUPABASE
+// ════════════════════════════════════════════
+const SUPABASE_URL  = 'https://lxbjtqzfcwcbeteimzos.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4Ymp0cXpmY3djYmV0ZWltem9zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMzU1MTQsImV4cCI6MjA4ODgxMTUxNH0.nDKvv0LDd4Fa_hmuNPdSTanyXNC0WQmEklm-OPUQ6_M';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ═══════════════════════════════════════
-//   TELEGRAM INIT  (v1.2)
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  TELEGRAM
+// ════════════════════════════════════════════
 const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready();
-  tg.expand();
-  tg.setHeaderColor('#180d06');
-  tg.setBackgroundColor('#180d06');
-}
-
-// Метод 1: initDataUnsafe.user (стандарт)
-// Метод 2: ручной парсинг initData (некоторые версии Telegram не заполняют initDataUnsafe)
-function getTgUser() {
-  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
-    return tg.initDataUnsafe.user;
-  }
-  try {
-    var raw = tg && tg.initData;
-    if (raw && raw.length > 0) {
-      var params = new URLSearchParams(raw);
-      var userStr = params.get('user');
-      if (userStr) return JSON.parse(userStr);
-    }
-  } catch(e) { console.warn('initData parse error:', e); }
-  return null;
-}
-
-// Стабильный ID без Telegram: сохраняем в localStorage + cookie,
-// потому что Telegram WebView может очищать localStorage
+if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('#180d06'); tg.setBackgroundColor('#180d06'); }
+const tgUser = tg?.initDataUnsafe?.user;
 function getStableDeviceId() {
-  var KEY = '_doner_uid';
-  var id = null;
-  try { id = localStorage.getItem(KEY); } catch(e) {}
-  if (!id) {
-    try {
-      var rx = new RegExp('(?:^|; )' + KEY + '=([^;]+)');
-      var m = document.cookie.match(rx);
-      if (m) id = m[1];
-    } catch(e) {}
-  }
-  if (!id) {
-    id = 'dev_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
-  }
-  try { localStorage.setItem(KEY, id); } catch(e) {}
-  try { document.cookie = KEY + '=' + id + ';max-age=31536000;path=/;SameSite=Lax'; } catch(e) {}
+  const K = '_doner_device_id';
+  let id = localStorage.getItem(K);
+  if (!id) { id = 'device_' + Date.now().toString(36) + Math.random().toString(36).substr(2,5); localStorage.setItem(K, id); }
   return id;
 }
-
-const tgUser  = getTgUser();
-const userId  = tgUser ? String(tgUser.id) : getStableDeviceId();
-
-// Ник: @username → Имя Фамилия → Гость Ахмеда
-const userName = tgUser
-  ? (tgUser.username
-      ? '@' + tgUser.username
-      : (tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '')).trim())
-  : 'Гость Ахмеда';
-
-// Аватарка: первые буквы
-const avatarSource = ((tgUser && (tgUser.username || tgUser.first_name)) || 'GA').replace('@','');
-const initials = avatarSource.split(/[\s_]/).map(function(w){return w[0]||'';}).join('').toUpperCase().substr(0,2) || '??';
-
+const userId   = String(tgUser?.id || getStableDeviceId());
+const userName = tgUser ? (tgUser.username ? '@'+tgUser.username : tgUser.first_name+(tgUser.last_name?' '+tgUser.last_name:'')) : 'Гость Ахмеда';
+const avatarSrc = tgUser?.username || tgUser?.first_name || 'GA';
+const initials = avatarSrc.replace('@','').split(/[\s_]/).map(w=>w[0]||'').join('').toUpperCase().substr(0,2)||'??';
 document.getElementById('username').textContent = userName;
 document.getElementById('avatar').textContent   = initials;
 
-// Диагностика (можно убрать позже)
-console.log('Auth debug:', {
-  userId: userId,
-  userName: userName,
-  hasTg: !!tgUser,
-  initDataLen: (tg && tg.initData && tg.initData.length) || 0
-});
+function setSyncStatus(s) { document.getElementById('sync-dot').className = 'sync-dot ' + s; }
 
-// ═══════════════════════════════════════
-//   SYNC STATUS DOT
-// ═══════════════════════════════════════
-function setSyncStatus(status) {
-  const dot = document.getElementById('sync-dot');
-  dot.className = 'sync-dot ' + status;
+// ════════════════════════════════════════════
+//  КОНФИГИ
+// ════════════════════════════════════════════
+const RANKS = [
+  {name:'Голодный студент', min:0,       max:1000},
+  {name:'Постоянный клиент',min:1000,    max:10000},
+  {name:'Ценитель специй',  min:10000,   max:50000},
+  {name:'Друг Ахмеда',      min:50000,   max:200000},
+  {name:'Шаурмастер',       min:200000,  max:1000000},
+  {name:'Легенда Донерной', min:1000000, max:5000000},
+  {name:'🔥 Сам Ахмед',     min:5000000, max:Infinity},
+];
+
+// === РЕЦЕПТЫ ===
+const RECIPES_CONFIG = [
+  {
+    id:'classic', name:'Классический', icon:'🥙', emoji:'🥙',
+    desc:'Проверенный рецепт Ахмеда с 1994 года',
+    cost:0, unlockAt:0,
+    bonuses:['Базовый рецепт'],
+    apply: s => s,
+  },
+  {
+    id:'chicken', name:'Куриный донер', icon:'🍗', emoji:'🍗',
+    desc:'Нежная курица со специями. Посетители в восторге!',
+    cost:5000, unlockAt:1000,
+    bonuses:['+50% к каждому тапу', 'Критические удары ×2'],
+    apply: s => { s.tapPower = Math.floor(s.tapPower * 1.5); s.critMult = (s.critMult||5) * 1.5; return s; },
+  },
+  {
+    id:'beef', name:'Говяжий донер', icon:'🥩', emoji:'🥩',
+    desc:'Сочная говядина на углях. Очереди стоят с утра!',
+    cost:25000, unlockAt:10000,
+    bonuses:['+100% к тапу', 'Авто-нарезка ×2', 'Комбо множитель ×1.5'],
+    apply: s => { s.tapPower = Math.floor(s.tapPower * 2); s.autoLevel = Math.ceil(s.autoLevel * 1.5 + 0.1); s.comboMult = (s.comboMult||1) * 1.5; return s; },
+  },
+  {
+    id:'veggie', name:'Вегетарианский', icon:'🥗', emoji:'🥗',
+    desc:'Модный ЗОЖ-донер. Молодёжь сметает за минуты.',
+    cost:80000, unlockAt:50000,
+    bonuses:['+200% регенерация', 'Макс. аппетит ×1.5', '+15% крит-шанс'],
+    apply: s => { s.regenRate = (s.regenRate||1) * 3; s.maxEnergy = Math.floor(s.maxEnergy * 1.5); s.critChance = Math.min(0.65, (s.critChance||0.05) + 0.15); return s; },
+  },
+  {
+    id:'luxury', name:'Люкс-донер', icon:'👑', emoji:'👑',
+    desc:'Трюфель, мраморная говядина, золотой лаваш. Легенда!',
+    cost:500000, unlockAt:200000,
+    bonuses:['Все бонусы ×2', 'Крит ×10', 'Особая аура'],
+    apply: s => { s.tapPower = Math.floor(s.tapPower * 2); s.critMult = (s.critMult||5) * 2; s.regenRate = (s.regenRate||1) * 2; s.comboMult = (s.comboMult||1) * 2; return s; },
+  },
+];
+
+// === УЛУЧШЕНИЯ (12 штук в 2 категориях) ===
+const UPGRADES_CONFIG = [
+  // Базовая кухня
+  {id:'knife',    cat:'base', name:'Острый нож',        icon:'🔪', desc:'Тоньше нарезка — больше лир',           baseCost:50,    costMult:2.2, maxLevel:10, effect:'tap',        value:1},
+  {id:'lavash',   cat:'base', name:'Свежий лаваш',      icon:'🫓', desc:'Больше аппетита посетителей',           baseCost:200,   costMult:2.5, maxLevel:8,  effect:'maxEnergy',  value:200},
+  {id:'grill',    cat:'base', name:'Угольный гриль',    icon:'🔥', desc:'Мясо готовится быстрее',                baseCost:300,   costMult:3,   maxLevel:8,  effect:'regen',      value:0.5},
+  {id:'sauce',    cat:'base', name:'Чесночный соус',    icon:'🧄', desc:'Шанс мега-порции ×5',                  baseCost:500,   costMult:2.8, maxLevel:8,  effect:'crit',       value:0.05},
+  {id:'mustafa',  cat:'base', name:'Помощник Мустафа',  icon:'👨‍🍳', desc:'Авто-нарезка пока ты отдыхаешь',     baseCost:2000,  costMult:4,   maxLevel:5,  effect:'auto',       value:1},
+  {id:'double',   cat:'base', name:'Двойная порция',    icon:'🥙', desc:'Множитель комбо-заказов',               baseCost:1500,  costMult:3.5, maxLevel:8,  effect:'combo',      value:0.2},
+  // Продвинутая кухня (открывается после ур. 3)
+  {id:'tandoor',  cat:'pro',  name:'Тандыр',            icon:'🏺', desc:'Древняя печь. +5 к тапу за уровень',    baseCost:8000,  costMult:3,   maxLevel:5,  effect:'tap',        value:5,   unlockLevel:3},
+  {id:'spices',   cat:'pro',  name:'Турецкие специи',   icon:'🌶️', desc:'Импорт из Стамбула. Крит ×1.5 шанс',   baseCost:12000, costMult:3.5, maxLevel:5,  effect:'crit',       value:0.08, unlockLevel:3},
+  {id:'delivery', cat:'pro',  name:'Курьер Ali',        icon:'🛵', desc:'Доставка = авто-доход ×2',              baseCost:20000, costMult:4,   maxLevel:4,  effect:'auto',       value:2,   unlockLevel:4},
+  {id:'instagram',cat:'pro',  name:'Инстаграм-реклама', icon:'📸', desc:'Хайп! Энергия восстанавливается быстрее',baseCost:35000, costMult:3.5, maxLevel:4,  effect:'regen',      value:2,   unlockLevel:4},
+  {id:'freezer',  cat:'pro',  name:'Холодильник',        icon:'🧊', desc:'Запас лаваша. Макс. аппетит +500',      baseCost:50000, costMult:4,   maxLevel:3,  effect:'maxEnergy',  value:500, unlockLevel:5},
+  {id:'goldknife',cat:'pro',  name:'Золотой нож',        icon:'✨', desc:'Легендарный нож. Каждый тап ×3',        baseCost:150000,costMult:5,   maxLevel:3,  effect:'tapMult',    value:1,   unlockLevel:6},
+];
+
+// === СЛУЧАЙНЫЕ СОБЫТИЯ ===
+const EVENTS_CONFIG = [
+  {
+    id:'inspector', icon:'👮', title:'Пришёл ревизор!',
+    desc:'Санэпидемстанция нагрянула. Нужно дать взятку или закрыть кухню на 30 секунд.',
+    btnOk:'💸 Дать взятку (500₺)', btnSkip:'😤 Отказать',
+    onOk: (s) => { s.coins = Math.max(0, s.coins - 500); return {s, msg:'👮 Ревизор ушёл довольный!'}; },
+    onSkip: () => { return {freeze:30, msg:'🚔 Кухня закрыта на 30 секунд!'}; },
+    overlayClass: 'police', minEarned:500,
+  },
+  {
+    id:'queue', icon:'🧍‍♂️', title:'Очередь из 50 человек!',
+    desc:'Толпа голодных студентов требует донеры прямо сейчас. Двойные деньги на 60 секунд!',
+    btnOk:'🔥 Нарезаем быстрее!', btnSkip:null,
+    onOk: () => { return {mult:2, duration:60, msg:'🧍‍♂️ Двойные лиры на 60 секунд!'}; },
+    overlayClass: '', minEarned:200,
+  },
+  {
+    id:'discount', icon:'🎉', title:'Скидка на лаваш!',
+    desc:'Оптовый поставщик сделал скидку 40%. Все улучшения дешевле на 60 секунд!',
+    btnOk:'🛒 Закупаемся!', btnSkip:null,
+    onOk: () => { return {discount:0.4, duration:60, msg:'🎉 Скидка 40% на улучшения — 60 сек!'}; },
+    overlayClass: '', minEarned:300,
+  },
+  {
+    id:'ahmed_call', icon:'📞', title:'Звонит Ахмед!',
+    desc:'Хозяин в отпуске в Анталье но хочет поговорить. Выслушай его — получи бонус!',
+    btnOk:'📱 Поговорить', btnSkip:'🔕 Сбросить',
+    onOk: (s) => { const b = 300 + Math.floor(s.totalEarned * 0.02); s.coins += b; return {s, msg:`📞 Ахмед доволен! +${fmt(b)} лир!`}; },
+    onSkip: () => { return {msg:'😤 Ахмед обиделся...'}; },
+    overlayClass: '', minEarned:0,
+  },
+  {
+    id:'istanbul', icon:'🚢', title:'Специи из Стамбула!',
+    desc:'Прибыл контейнер с редкими специями. Критический удар ×3 на следующие 45 секунд!',
+    btnOk:'🌶️ Берём всё!', btnSkip:null,
+    onOk: () => { return {critBoost:3, duration:45, msg:'🌶️ Специи из Стамбула — криты ×3 на 45 сек!'}; },
+    overlayClass: 'fire', minEarned:1000,
+  },
+  {
+    id:'food_blogger', icon:'🤳', title:'Блогер в заведении!',
+    desc:'Тиктокер с 500к подписчиков снимает ролик. Реклама! Авто-доход ×5 на 2 минуты!',
+    btnOk:'😊 Позировать', btnSkip:'🙈 Спрятаться',
+    onOk: (s) => { return {autoBoost:5, duration:120, msg:'🤳 Вирусный ролик! Авто-доход ×5 на 2 мин!'}; },
+    onSkip: () => { return {msg:'😔 Упустил момент...'}; },
+    overlayClass: '', minEarned:5000,
+  },
+];
+
+// === БОЕВОЙ ПРОПУСК (30 дней) ===
+function getBPTasks() {
+  return [
+    {day:1,  name:'Первый донер',         icon:'🥙', type:'tap',     goal:50,     reward:200},
+    {day:2,  name:'Разогрев кухни',       icon:'🔥', type:'tap',     goal:150,    reward:400},
+    {day:3,  name:'Первые лиры',          icon:'💵', type:'earn',    goal:500,    reward:600},
+    {day:4,  name:'Улучши нож',           icon:'🔪', type:'upgrade', goal:1,      reward:800},
+    {day:5,  name:'Нарезай активно',      icon:'⚡', type:'tap',     goal:300,    reward:1000},
+    {day:6,  name:'Накопи запасы',        icon:'💰', type:'earn',    goal:2000,   reward:1200},
+    {day:7,  name:'Неделя пройдена!',     icon:'🎉', type:'tap',     goal:500,    reward:2500},
+    {day:8,  name:'Скоростная нарезка',   icon:'🔪', type:'tap',     goal:800,    reward:1500},
+    {day:9,  name:'Открой рецепт',        icon:'📜', type:'recipe',  goal:1,      reward:2000},
+    {day:10, name:'Десятый день!',        icon:'🏅', type:'earn',    goal:10000,  reward:3000},
+    {day:11, name:'Серия комбо',          icon:'💥', type:'tap',     goal:1000,   reward:1800},
+    {day:12, name:'Прокачай кухню',       icon:'⚙️', type:'upgrade', goal:3,      reward:2000},
+    {day:13, name:'Накорми сотню',        icon:'🧍', type:'tap',     goal:1500,   reward:2200},
+    {day:14, name:'Две недели!',          icon:'🎊', type:'earn',    goal:25000,  reward:5000},
+    {day:15, name:'Мастер специй',        icon:'🌶️', type:'tap',     goal:2000,   reward:2500},
+    {day:16, name:'Богатый донер',        icon:'💎', type:'earn',    goal:50000,  reward:3000},
+    {day:17, name:'Авто-кухня',           icon:'👨‍🍳', type:'upgrade', goal:5,      reward:3500},
+    {day:18, name:'Стамбульский стиль',   icon:'🕌', type:'tap',     goal:3000,   reward:3000},
+    {day:19, name:'Звезда рейтинга',      icon:'⭐', type:'earn',    goal:100000, reward:4000},
+    {day:20, name:'Двадцать дней!',       icon:'🔥', type:'tap',     goal:4000,   reward:6000},
+    {day:21, name:'Три недели силы',      icon:'💪', type:'upgrade', goal:8,      reward:5000},
+    {day:22, name:'Очередь на улице',     icon:'🧍‍♂️', type:'tap',    goal:5000,   reward:5500},
+    {day:23, name:'Большая выручка',      icon:'💵', type:'earn',    goal:200000, reward:6000},
+    {day:24, name:'Продвинутая кухня',    icon:'🏺', type:'upgrade', goal:10,     reward:7000},
+    {day:25, name:'Четверть года!',       icon:'📅', type:'tap',     goal:6000,   reward:8000},
+    {day:26, name:'Миллион близко',       icon:'🎯', type:'earn',    goal:500000, reward:10000},
+    {day:27, name:'Нарезай до упаду',     icon:'⚡', type:'tap',     goal:8000,   reward:9000},
+    {day:28, name:'Почти финал',          icon:'🏁', type:'upgrade', goal:12,     reward:10000},
+    {day:29, name:'Последний рывок',      icon:'🔥', type:'earn',    goal:1000000,reward:15000},
+    {day:30, name:'🥙 ЛЕГЕНДА АХМЕДА',   icon:'👑', type:'tap',     goal:10000,  reward:50000},
+  ];
 }
 
-// ═══════════════════════════════════════
-//   GAME CONFIG
-// ═══════════════════════════════════════
-const RANKS = [
-  { name:'Голодный студент',  min:0,       max:1000    },
-  { name:'Постоянный клиент', min:1000,    max:10000   },
-  { name:'Ценитель специй',   min:10000,   max:50000   },
-  { name:'Друг Ахмеда',       min:50000,   max:200000  },
-  { name:'Шаурмастер',        min:200000,  max:1000000 },
-  { name:'Легенда Донерной',  min:1000000, max:5000000 },
-  { name:'🔥 Сам Ахмед',      min:5000000, max:Infinity},
-];
-
-const UPGRADES_CONFIG = [
-  { id:'knife',   name:'Острый нож',       icon:'🔪', desc:'Тоньше нарезка — больше лир',       baseCost:50,   costMult:2.2, maxLevel:10, effect:'tap',       value:1   },
-  { id:'lavash',  name:'Свежий лаваш',     icon:'🫓', desc:'Больше аппетита посетителей',       baseCost:200,  costMult:2.5, maxLevel:5,  effect:'maxEnergy', value:200 },
-  { id:'grill',   name:'Угольный гриль',   icon:'🔥', desc:'Мясо готовится быстрее',            baseCost:300,  costMult:3,   maxLevel:5,  effect:'regen',     value:0.5 },
-  { id:'sauce',   name:'Чесночный соус',   icon:'🧄', desc:'Шанс мега-порции ×5',              baseCost:500,  costMult:2.8, maxLevel:5,  effect:'crit',      value:5   },
-  { id:'mustafa', name:'Помощник Мустафа', icon:'👨‍🍳', desc:'Авто-нарезка пока ты отдыхаешь', baseCost:2000, costMult:4,   maxLevel:3,  effect:'auto',      value:1   },
-  { id:'double',  name:'Двойной донер',    icon:'🥙', desc:'Множитель комбо-заказов',           baseCost:1500, costMult:3.5, maxLevel:5,  effect:'combo',     value:0.2 },
-];
-
-// ═══════════════════════════════════════
-//   STATE
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
 function defaultState() {
   return {
     coins:0, totalEarned:0,
     energy:1000, maxEnergy:1000,
     regenRate:1, tapPower:1, critChance:0.05, critMult:5,
     autoLevel:0, comboMult:1,
-    upgrades:{ knife:0, lavash:0, grill:0, sauce:0, mustafa:0, double:0 },
-    lastSave: Date.now(),
-    lastDaily: 0,
-    tasks:{ tap500:0, earn10k:0, upgrade3:0 }
+    upgrades:{knife:0,lavash:0,grill:0,sauce:0,mustafa:0,double:0,tandoor:0,spices:0,delivery:0,instagram:0,freezer:0,goldknife:0},
+    activeRecipe:'classic',
+    unlockedRecipes:['classic'],
+    lastSave:Date.now(),
+    lastDaily:0,
+    lastEventTime:0,
+    tasks:{tap500:0, earn10k:0, upgrade3:0},
+    // боевой пропуск
+    bp:{
+      seasonStart: getSeasonStart(),
+      claimed:[],        // массив номеров дней которые уже забрали
+      progress:{},       // {tap:N, earn:N, upgrade:N, recipe:N} накоплено за сегодня
+      lastProgressDay:0, // какой игровой день был при последнем сбросе прогресса
+    },
+    // временные эффекты
+    effects:{
+      mult:1, multUntil:0,
+      discount:0, discountUntil:0,
+      critBoost:1, critBoostUntil:0,
+      autoBoost:1, autoBoostUntil:0,
+      frozen:false, frozenUntil:0,
+    }
   };
+}
+
+function getSeasonStart() {
+  // Сезон сбрасывается каждые 30 дней от фиксированной даты
+  const base = new Date('2025-01-01').getTime();
+  const now = Date.now();
+  const period = 30 * 24 * 3600 * 1000;
+  return base + Math.floor((now - base) / period) * period;
 }
 
 let state = defaultState();
 let stateLoaded = false;
 
-// ═══════════════════════════════════════
-//   LOAD STATE — сначала Supabase, потом localStorage
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  LOAD / SAVE
+// ════════════════════════════════════════════
 async function loadState() {
   setSyncStatus('syncing');
   try {
-    const { data, error } = await db
-      .from('players')
-      .select('state_json')
-      .eq('user_id', userId)
-      .single();
-
+    const {data, error} = await db.from('players').select('state_json').eq('user_id', userId).single();
     if (!error && data?.state_json) {
-      state = { ...defaultState(), ...data.state_json };
+      state = {...defaultState(), ...data.state_json};
+      // гарантируем новые поля есть
+      if (!state.bp) state.bp = defaultState().bp;
+      if (!state.effects) state.effects = defaultState().effects;
+      if (!state.unlockedRecipes) state.unlockedRecipes = ['classic'];
+      if (!state.activeRecipe) state.activeRecipe = 'classic';
       setSyncStatus('synced');
-      stateLoaded = true;
-      return;
+      stateLoaded = true; return;
     }
-  } catch(e) {
-    console.warn('Supabase load failed, using localStorage:', e);
-  }
-
-  // Резерв — localStorage
+  } catch(e) { console.warn('Supabase load failed:', e); }
   try {
-    const local = localStorage.getItem('ahmedsdoner_v3_' + userId);
-    if (local) state = { ...defaultState(), ...JSON.parse(local) };
+    const local = localStorage.getItem('ahmedsdoner_v4_' + userId);
+    if (local) { state = {...defaultState(), ...JSON.parse(local)}; if (!state.bp) state.bp = defaultState().bp; }
   } catch(e) {}
-
   setSyncStatus('error');
   stateLoaded = true;
 }
 
-// ═══════════════════════════════════════
-//   SAVE STATE — в Supabase + localStorage
-// ═══════════════════════════════════════
 let isSaving = false;
 async function saveState() {
   if (!stateLoaded || isSaving) return;
   isSaving = true;
   state.lastSave = Date.now();
-
-  // Всегда пишем в localStorage как кэш
-  try {
-    localStorage.setItem('ahmedsdoner_v3_' + userId, JSON.stringify(state));
-  } catch(e) {}
-
-  // Основное сохранение в Supabase
+  try { localStorage.setItem('ahmedsdoner_v4_' + userId, JSON.stringify(state)); } catch(e) {}
   setSyncStatus('syncing');
   try {
-    const { error } = await db.from('players').upsert({
-      user_id:      userId,
-      username:     userName,
-      state_json:   state,
-      total_earned: state.totalEarned,
-      level:        getLevel(),
-      updated_at:   new Date().toISOString()
-    }, { onConflict: 'user_id' });
-
+    const {error} = await db.from('players').upsert({
+      user_id: userId, username: userName,
+      state_json: state, total_earned: state.totalEarned,
+      level: getLevel(), updated_at: new Date().toISOString()
+    }, {onConflict:'user_id'});
     setSyncStatus(error ? 'error' : 'synced');
-  } catch(e) {
-    setSyncStatus('error');
-  }
+  } catch(e) { setSyncStatus('error'); }
   isSaving = false;
 }
 
-// ═══════════════════════════════════════
-//   LEADERBOARD — из Supabase (реальный общий)
-// ═══════════════════════════════════════
-async function loadLeaderboard() {
-  const container = document.getElementById('leaderboard');
-  container.innerHTML = `<div class="lb-loading"><span class="lb-loading-spinner">🥙</span>Загружаем рейтинг...</div>`;
-
-  try {
-    const { data, error } = await db
-      .from('players')
-      .select('user_id, username, total_earned, level')
-      .order('total_earned', { ascending: false })
-      .limit(20);
-
-    if (error) throw error;
-
-    container.innerHTML = '';
-    if (!data || data.length === 0) {
-      container.innerHTML = `<div class="lb-loading">Будь первым в рейтинге! 🥇</div>`;
-      return;
-    }
-
-    let myPos = data.findIndex(p => p.user_id === userId) + 1;
-
-    data.forEach((player, i) => {
-      const rank  = i + 1;
-      const isMe  = player.user_id === userId;
-      const badge = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank;
-      const ini   = (player.username||'??').split(/[\s_]/).map(w=>w[0]||'').join('').toUpperCase().substr(0,2)||'??';
-      const div   = document.createElement('div');
-      div.className = 'leader-item'+(isMe?' me':'')+(rank===1?' top1':rank===2?' top2':rank===3?' top3':'');
-      div.innerHTML = `
-        <div class="leader-rank ${rank<=3?'rank-'+rank:'rank-other'}">${badge}</div>
-        <div class="leader-avatar">${ini}</div>
-        <div class="leader-name">
-          <strong>${player.username||'Аноним'}${isMe?' 👈 (Ты)':''}</strong>
-          <span>Шеф-повар ур. ${player.level||1}</span>
-        </div>
-        <div class="leader-score">
-          ${fmt(player.total_earned||0)}₺
-          <small>лир заработано</small>
-        </div>
-      `;
-      container.appendChild(div);
-    });
-
-    if (myPos === 0 && state.totalEarned > 0) {
-      const div = document.createElement('div');
-      div.style.cssText = 'text-align:center;padding:12px;font-size:13px;color:var(--muted);font-weight:700;';
-      div.textContent = 'Ты ещё не в топ-20';
-      container.appendChild(div);
-    }
-
-  } catch(e) {
-    container.innerHTML = `<div class="lb-loading">⚠️ Ошибка загрузки рейтинга</div>`;
-    console.error('Leaderboard error:', e);
-  }
-}
-
-// ═══════════════════════════════════════
-//   UTILS
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════
 function fmt(n) {
   if (n >= 1e9) return (n/1e9).toFixed(1)+'B';
   if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
   if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
   return Math.floor(n).toString();
 }
-
 function getLevel() {
   const t = state.totalEarned;
-  if (t < 1000)    return 1;
-  if (t < 5000)    return 2;
-  if (t < 20000)   return 3;
-  if (t < 100000)  return 4;
-  if (t < 500000)  return 5;
-  if (t < 2000000) return 6;
-  return 7;
+  if (t<1000) return 1; if (t<5000) return 2; if (t<20000) return 3;
+  if (t<100000) return 4; if (t<500000) return 5; if (t<2000000) return 6; return 7;
+}
+function getRank() { return RANKS.find(r=>state.totalEarned>=r.min && state.totalEarned<r.max)||RANKS[RANKS.length-1]; }
+function getUpgCost(cfg, lv) { return Math.floor(cfg.baseCost * Math.pow(cfg.costMult, lv) * (isDiscountActive() ? (1 - state.effects.discount) : 1)); }
+function isDiscountActive() { return Date.now() < (state.effects?.discountUntil||0); }
+function isMultActive()     { return Date.now() < (state.effects?.multUntil||0); }
+function isCritBoostActive(){ return Date.now() < (state.effects?.critBoostUntil||0); }
+function isAutoBoostActive() { return Date.now() < (state.effects?.autoBoostUntil||0); }
+function isFrozen()          { return state.effects?.frozen && Date.now() < (state.effects?.frozenUntil||0); }
+
+// ════════════════════════════════════════════
+//  РЕЦЕПТЫ — применение бонусов
+// ════════════════════════════════════════════
+function getEffectiveTapPower() {
+  // Пересчитываем каждый раз от базы чтобы не накапливать
+  let base = 1;
+  // Базовые апгрейды
+  base += (state.upgrades.knife||0) * UPGRADES_CONFIG.find(u=>u.id==='knife').value;
+  base += (state.upgrades.tandoor||0) * UPGRADES_CONFIG.find(u=>u.id==='tandoor').value;
+  // Золотой нож: множитель
+  const goldLv = state.upgrades.goldknife||0;
+  if (goldLv > 0) base = base * (1 + goldLv);
+  // Рецепт
+  const recipe = RECIPES_CONFIG.find(r=>r.id===state.activeRecipe);
+  if (recipe?.id === 'chicken') base = Math.floor(base * 1.5);
+  else if (recipe?.id === 'beef') base = Math.floor(base * 2);
+  else if (recipe?.id === 'luxury') base = Math.floor(base * 2);
+  return Math.max(1, base);
 }
 
-function getRank() {
-  return RANKS.find(r=>state.totalEarned>=r.min && state.totalEarned<r.max) || RANKS[RANKS.length-1];
+function getEffectiveAutoLevel() {
+  let base = state.upgrades.mustafa||0;
+  base += (state.upgrades.delivery||0) * 2;
+  const recipe = RECIPES_CONFIG.find(r=>r.id===state.activeRecipe);
+  if (recipe?.id === 'beef') base = Math.ceil(base * 1.5);
+  if (recipe?.id === 'luxury') base = base * 2;
+  if (isAutoBoostActive()) base = Math.floor(base * (state.effects.autoBoost||1));
+  return base;
 }
 
-function getUpgCost(cfg, lv) {
-  return Math.floor(cfg.baseCost * Math.pow(cfg.costMult, lv));
+function getEffectiveCritChance() {
+  let base = 0.05 + (state.upgrades.sauce||0) * 0.05 + (state.upgrades.spices||0) * 0.08;
+  const recipe = RECIPES_CONFIG.find(r=>r.id===state.activeRecipe);
+  if (recipe?.id === 'chicken') base = base * 2;
+  if (recipe?.id === 'veggie') base = base + 0.15;
+  if (recipe?.id === 'luxury') base = base * 2;
+  return Math.min(0.65, base);
 }
 
-// ═══════════════════════════════════════
-//   DAILY BONUS
-// ═══════════════════════════════════════
+function getEffectiveCritMult() {
+  let base = 5;
+  const recipe = RECIPES_CONFIG.find(r=>r.id===state.activeRecipe);
+  if (recipe?.id === 'chicken') base = base * 1.5;
+  if (recipe?.id === 'luxury') base = base * 2;
+  if (isCritBoostActive()) base = base * (state.effects.critBoost||1);
+  return base;
+}
+
+function getEffectiveRegen() {
+  let base = 1 + (state.upgrades.grill||0) * 0.5 + (state.upgrades.instagram||0) * 2;
+  const recipe = RECIPES_CONFIG.find(r=>r.id===state.activeRecipe);
+  if (recipe?.id === 'veggie') base = base * 3;
+  if (recipe?.id === 'luxury') base = base * 2;
+  return base;
+}
+
+function getEffectiveMaxEnergy() {
+  let base = 1000 + (state.upgrades.lavash||0) * 200 + (state.upgrades.freezer||0) * 500;
+  const recipe = RECIPES_CONFIG.find(r=>r.id===state.activeRecipe);
+  if (recipe?.id === 'veggie') base = Math.floor(base * 1.5);
+  return base;
+}
+
+// ════════════════════════════════════════════
+//  DAILY
+// ════════════════════════════════════════════
 function claimDaily() {
   const now = Date.now();
-  if (now - (state.lastDaily||0) < 24*3600*1000) {
-    showToast('⏰ Уже получил! Завтра снова');
-    return;
-  }
+  if (now - (state.lastDaily||0) < 24*3600*1000) { showToast('⏰ Уже получил! Завтра снова'); return; }
   state.lastDaily = now;
   const bonus = 500 + getLevel() * 200;
   state.coins += bonus; state.totalEarned += bonus;
   tg?.HapticFeedback?.notificationOccurred('success');
   showToast(`🎁 Ахмед угостил тебя! +${fmt(bonus)} лир`);
   document.getElementById('daily-banner').style.opacity = '0.4';
+  trackBPProgress('earn', bonus);
   saveState(); updateUI();
 }
 
-// ═══════════════════════════════════════
-//   TAP
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  СОБЫТИЯ
+// ════════════════════════════════════════════
+let activeEvent = null;
+let eventModalTimer = null;
+
+function tryTriggerEvent() {
+  if (!stateLoaded) return;
+  if (activeEvent) return;
+  const now = Date.now();
+  const cooldown = 45000 + Math.random() * 60000; // 45-105 сек
+  if (now - (state.lastEventTime||0) < cooldown) return;
+
+  const available = EVENTS_CONFIG.filter(e => state.totalEarned >= e.minEarned);
+  if (!available.length) return;
+
+  const ev = available[Math.floor(Math.random() * available.length)];
+  state.lastEventTime = now;
+  showEventBadge(ev);
+}
+
+function showEventBadge(ev) {
+  activeEvent = ev;
+  const wrap = document.getElementById('event-badge-wrap');
+  wrap.innerHTML = `
+    <div class="event-badge" onclick="openEventModal()">
+      <div class="event-badge-icon">${ev.icon}</div>
+      <div class="event-badge-text">
+        <div class="event-badge-title">${ev.title}</div>
+        <div class="event-badge-sub">Нажми чтобы ответить!</div>
+      </div>
+      <button class="event-badge-btn">РЕАГИРОВАТЬ</button>
+    </div>
+  `;
+  // Авто-закрыть через 30 сек
+  eventModalTimer = setTimeout(() => { dismissEvent(); }, 30000);
+}
+
+function openEventModal() {
+  if (!activeEvent) return;
+  const ev = activeEvent;
+  document.getElementById('modalIcon').textContent = ev.icon;
+  document.getElementById('modalTitle').textContent = ev.title;
+  document.getElementById('modalDesc').textContent = ev.desc;
+  document.getElementById('modalTimer').textContent = '';
+
+  const btns = document.getElementById('modalBtns');
+  btns.innerHTML = '';
+
+  const btnOk = document.createElement('button');
+  btnOk.className = 'modal-btn primary';
+  btnOk.textContent = ev.btnOk;
+  btnOk.onclick = () => { resolveEvent(true); };
+  btns.appendChild(btnOk);
+
+  if (ev.btnSkip) {
+    const btnSkip = document.createElement('button');
+    btnSkip.className = 'modal-btn secondary';
+    btnSkip.textContent = ev.btnSkip;
+    btnSkip.onclick = () => { resolveEvent(false); };
+    btns.appendChild(btnSkip);
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+  if (ev.overlayClass) { document.getElementById('effectOverlay').className = 'effect-overlay ' + ev.overlayClass; }
+}
+
+function resolveEvent(accepted) {
+  if (!activeEvent) return;
+  const ev = activeEvent;
+  clearTimeout(eventModalTimer);
+  closeModal();
+
+  const result = accepted ? ev.onOk(state) : (ev.onSkip ? ev.onSkip(state) : {msg:'Пропущено'});
+
+  if (result.s) state = result.s;
+  if (result.msg) showToast(result.msg);
+  if (result.freeze) {
+    state.effects.frozen = true;
+    state.effects.frozenUntil = Date.now() + result.freeze * 1000;
+    setTimeout(() => { state.effects.frozen = false; showToast('✅ Кухня снова открыта!'); }, result.freeze * 1000);
+  }
+  if (result.mult) {
+    state.effects.mult = result.mult;
+    state.effects.multUntil = Date.now() + (result.duration||60) * 1000;
+    setTimeout(() => { state.effects.mult = 1; showToast('⏰ Двойной доход закончился'); }, (result.duration||60) * 1000);
+  }
+  if (result.discount) {
+    state.effects.discount = result.discount;
+    state.effects.discountUntil = Date.now() + (result.duration||60) * 1000;
+    setTimeout(() => { state.effects.discount = 0; showToast('⏰ Скидка закончилась'); updateUI(); }, (result.duration||60) * 1000);
+  }
+  if (result.critBoost) {
+    state.effects.critBoost = result.critBoost;
+    state.effects.critBoostUntil = Date.now() + (result.duration||45) * 1000;
+    setTimeout(() => { state.effects.critBoost = 1; }, (result.duration||45) * 1000);
+  }
+  if (result.autoBoost) {
+    state.effects.autoBoost = result.autoBoost;
+    state.effects.autoBoostUntil = Date.now() + (result.duration||120) * 1000;
+    setTimeout(() => { state.effects.autoBoost = 1; showToast('⏰ Буст авто-дохода закончился'); }, (result.duration||120) * 1000);
+  }
+
+  tg?.HapticFeedback?.notificationOccurred(accepted ? 'success' : 'warning');
+  dismissEvent();
+  saveState();
+  updateUI();
+}
+
+function dismissEvent() {
+  activeEvent = null;
+  clearTimeout(eventModalTimer);
+  document.getElementById('event-badge-wrap').innerHTML = '';
+  document.getElementById('effectOverlay').className = 'effect-overlay';
+}
+
+function handleModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) { if (activeEvent) resolveEvent(false); else closeModal(); } }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); document.getElementById('effectOverlay').className = 'effect-overlay'; }
+
+// ════════════════════════════════════════════
+//  TAP
+// ════════════════════════════════════════════
 let comboCount=0, comboTimer=null, lastTapTime=0;
 
 function handleTap(e) {
   if (!stateLoaded) return;
+  if (isFrozen()) {
+    showToast('🚔 Кухня закрыта ревизором!');
+    document.getElementById('donerBtn').classList.add('shake');
+    setTimeout(()=>document.getElementById('donerBtn').classList.remove('shake'),200);
+    return;
+  }
   if (state.energy <= 0) {
     showToast('😤 Посетители наелись! Жди следующих...');
     document.getElementById('donerBtn').classList.add('shake');
-    setTimeout(()=>document.getElementById('donerBtn').classList.remove('shake'), 200);
+    setTimeout(()=>document.getElementById('donerBtn').classList.remove('shake'),200);
     return;
   }
 
   const now = Date.now();
-  const diff = now - lastTapTime;
-  lastTapTime = now;
-
-  if (diff < 600) comboCount = Math.min(comboCount+1, 50);
-  else comboCount = 1;
-
+  const diff = now - lastTapTime; lastTapTime = now;
+  if (diff < 600) comboCount = Math.min(comboCount+1, 50); else comboCount = 1;
   clearTimeout(comboTimer);
-  comboTimer = setTimeout(()=>{
-    comboCount = 0;
-    document.getElementById('combo-display').textContent = '';
-  }, 1200);
+  comboTimer = setTimeout(()=>{ comboCount=0; document.getElementById('combo-display').textContent=''; }, 1200);
 
-  let earned = state.tapPower;
+  let earned = getEffectiveTapPower();
   let isCrit = false;
-  if (Math.random() < state.critChance) { earned *= state.critMult; isCrit = true; }
-  if (comboCount > 5) earned = Math.floor(earned * (1 + (comboCount-5)*state.comboMult*0.1));
-  earned = Math.floor(earned);
+  if (Math.random() < getEffectiveCritChance()) { earned = Math.floor(earned * getEffectiveCritMult()); isCrit = true; }
+  if (comboCount > 5) earned = Math.floor(earned * (1 + (comboCount-5)*(state.upgrades.double||0)*0.2*((state.comboMult||1))));
+  if (isMultActive()) earned = Math.floor(earned * (state.effects.mult||1));
+  earned = Math.max(1, Math.floor(earned));
 
-  state.coins += earned;
-  state.totalEarned += earned;
-  state.energy = Math.max(0, state.energy-1);
-  state.tasks.tap500  = (state.tasks.tap500||0)+1;
-  state.tasks.earn10k = (state.tasks.earn10k||0)+earned;
+  state.coins += earned; state.totalEarned += earned;
+  state.energy = Math.max(0, state.energy - 1);
+  state.tasks.tap500  = (state.tasks.tap500||0)  + 1;
+  state.tasks.earn10k = (state.tasks.earn10k||0) + earned;
+  trackBPProgress('tap', 1);
+  trackBPProgress('earn', earned);
 
   const rect = document.getElementById('donerBtn').getBoundingClientRect();
   const x = e.clientX || rect.left+rect.width/2;
@@ -892,255 +954,489 @@ function handleTap(e) {
   else        tg?.HapticFeedback?.impactOccurred('light');
 
   if (comboCount > 3) {
-    const icons = ['🔪','🌶️','🧄','🔥','💥'];
-    document.getElementById('combo-display').textContent =
-      `${icons[Math.min(Math.floor(comboCount/8),4)]} КОМБО-ЗАКАЗ ×${comboCount}`;
-  } else {
-    document.getElementById('combo-display').textContent = '';
-  }
+    const icons=['🔪','🌶️','🧄','🔥','💥'];
+    document.getElementById('combo-display').textContent = `${icons[Math.min(Math.floor(comboCount/8),4)]} КОМБО ×${comboCount}`;
+  } else { document.getElementById('combo-display').textContent=''; }
 
   updateUI();
 }
 
-// ═══════════════════════════════════════
-//   FLOAT NUMBERS
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  УЛУЧШЕНИЯ
+// ════════════════════════════════════════════
+function buyUpgrade(id) {
+  const cfg = UPGRADES_CONFIG.find(u=>u.id===id);
+  const lv  = state.upgrades[id]||0;
+  if (lv >= cfg.maxLevel) return;
+  if (cfg.unlockLevel && getLevel() < cfg.unlockLevel) { showToast(`🔒 Нужен уровень шефа ${cfg.unlockLevel}`); return; }
+  const cost = getUpgCost(cfg, lv);
+  if (state.coins < cost) { showToast('💸 Мало лир! Нарезай больше!'); return; }
+  state.coins -= cost;
+  state.upgrades[id] = lv + 1;
+  state.tasks.upgrade3 = (state.tasks.upgrade3||0) + 1;
+  trackBPProgress('upgrade', 1);
+  tg?.HapticFeedback?.notificationOccurred('success');
+  showToast(`✅ ${cfg.name} — уровень ${lv+1}!`);
+  if (isDiscountActive()) showToast(`🎉 Скидка применена!`);
+  saveState(); updateUI();
+}
+
+// ════════════════════════════════════════════
+//  РЕЦЕПТЫ
+// ════════════════════════════════════════════
+function buyRecipe(id) {
+  const recipe = RECIPES_CONFIG.find(r=>r.id===id);
+  if (!recipe || recipe.cost === 0) return;
+  if (state.totalEarned < recipe.unlockAt) { showToast(`🔒 Нужно заработать ${fmt(recipe.unlockAt)} лир`); return; }
+  if (state.coins < recipe.cost) { showToast('💸 Мало лир!'); return; }
+  state.coins -= recipe.cost;
+  if (!state.unlockedRecipes.includes(id)) state.unlockedRecipes.push(id);
+  trackBPProgress('recipe', 1);
+  tg?.HapticFeedback?.notificationOccurred('success');
+  showToast(`📜 Рецепт "${recipe.name}" открыт!`);
+  saveState(); updateUI(); renderRecipes();
+}
+
+function activateRecipe(id) {
+  if (!state.unlockedRecipes.includes(id)) return;
+  state.activeRecipe = id;
+  const recipe = RECIPES_CONFIG.find(r=>r.id===id);
+  tg?.HapticFeedback?.notificationOccurred('success');
+  showToast(`🥙 Теперь готовим: ${recipe.name}!`);
+  saveState(); updateUI(); renderRecipes();
+}
+
+// ════════════════════════════════════════════
+//  БОЕВОЙ ПРОПУСК
+// ════════════════════════════════════════════
+function getBPDay() {
+  const now = Date.now();
+  const start = state.bp?.seasonStart || getSeasonStart();
+  return Math.min(30, Math.floor((now - start) / (24*3600*1000)) + 1);
+}
+
+function trackBPProgress(type, amount) {
+  if (!state.bp) state.bp = defaultState().bp;
+  const day = getBPDay();
+  // Если сменился день — сбрасываем дневной прогресс
+  if (state.bp.lastProgressDay !== day) {
+    state.bp.progress = {};
+    state.bp.lastProgressDay = day;
+  }
+  state.bp.progress[type] = (state.bp.progress[type]||0) + amount;
+}
+
+function claimBPReward(day) {
+  if (!state.bp) state.bp = defaultState().bp;
+  if (state.bp.claimed.includes(day)) { showToast('✅ Уже получено!'); return; }
+  const task = getBPTasks().find(t=>t.day===day);
+  if (!task) return;
+  const prog = getBPProgressForDay(day);
+  if (prog < task.goal) { showToast('⏳ Задание не выполнено!'); return; }
+  state.bp.claimed.push(day);
+  state.coins += task.reward;
+  state.totalEarned += task.reward;
+  tg?.HapticFeedback?.notificationOccurred('success');
+  showToast(`🏆 День ${day} завершён! +${fmt(task.reward)} лир`);
+  saveState(); updateUI(); renderBattlePass();
+}
+
+function getBPProgressForDay(day) {
+  if (!state.bp) return 0;
+  const currentDay = getBPDay();
+  if (day < currentDay) {
+    // Прошлые дни: если claimed — считаем полными
+    return state.bp.claimed.includes(day) ? Infinity : 0;
+  }
+  if (day > currentDay) return 0;
+  // Текущий день
+  const task = getBPTasks().find(t=>t.day===day);
+  return state.bp.progress[task.type] || 0;
+}
+
+// ════════════════════════════════════════════
+//  LEADERBOARD
+// ════════════════════════════════════════════
+async function loadLeaderboard() {
+  const container = document.getElementById('leaderboard');
+  container.innerHTML = `<div class="lb-loading"><span class="lb-loading-spinner">🥙</span>Загружаем рейтинг...</div>`;
+  try {
+    const {data, error} = await db.from('players').select('user_id,username,total_earned,level').order('total_earned',{ascending:false}).limit(20);
+    if (error) throw error;
+    container.innerHTML = '';
+    if (!data || data.length === 0) { container.innerHTML = `<div class="lb-loading">Будь первым! 🥇</div>`; return; }
+    const myPos = data.findIndex(p=>p.user_id===userId)+1;
+    data.forEach((player,i) => {
+      const rank = i+1, isMe = player.user_id===userId;
+      const badge = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank;
+      const ini = (player.username||'??').replace('@','').split(/[\s_]/).map(w=>w[0]||'').join('').toUpperCase().substr(0,2)||'??';
+      const div = document.createElement('div');
+      div.className = 'leader-item'+(isMe?' me':'')+(rank===1?' top1':rank===2?' top2':rank===3?' top3':'');
+      div.innerHTML = `
+        <div class="leader-rank ${rank<=3?'rank-'+rank:'rank-other'}">${badge}</div>
+        <div class="leader-avatar">${ini}</div>
+        <div class="leader-name"><strong>${player.username||'Аноним'}${isMe?' 👈':''}</strong><span>Шеф ур. ${player.level||1}</span></div>
+        <div class="leader-score">${fmt(player.total_earned||0)}₺<small>лир заработано</small></div>
+      `;
+      container.appendChild(div);
+    });
+    if (myPos === 0 && state.totalEarned > 0) {
+      const div = document.createElement('div');
+      div.style.cssText = 'text-align:center;padding:12px;font-size:13px;color:var(--muted);font-weight:700;';
+      div.textContent = 'Ты ещё не в топ-20'; container.appendChild(div);
+    }
+  } catch(e) { container.innerHTML = `<div class="lb-loading">⚠️ Ошибка загрузки рейтинга</div>`; }
+}
+
+// ════════════════════════════════════════════
+//  CANVAS PARTICLES
+// ════════════════════════════════════════════
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+window.addEventListener('resize', ()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
+const particles = [];
 function spawnFloat(x, y, val, isCrit) {
   const el = document.createElement('div');
-  el.className = 'float-num' + (isCrit?' crit':'');
-  el.textContent = '+'+fmt(val)+'₺'+(isCrit?' МЕГА-ДОНЕР!':'');
+  el.className = 'float-num'+(isCrit?' crit':'');
+  el.textContent = '+'+fmt(val)+'₺'+(isCrit?' МЕГА!':'');
   el.style.left = (x-30+(Math.random()*20-10))+'px';
   el.style.top  = (y-20)+'px';
   document.body.appendChild(el);
   setTimeout(()=>el.remove(), 850);
 }
-
-// ═══════════════════════════════════════
-//   CANVAS PARTICLES
-// ═══════════════════════════════════════
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-window.addEventListener('resize', ()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
-
-const particles = [];
 function spawnParticles(x, y, isCrit) {
-  const count = isCrit ? 22 : 9;
-  for (let i=0; i<count; i++) {
-    const angle = (Math.PI*2*i)/count + Math.random()*0.6;
-    const speed = 2 + Math.random()*(isCrit?7:3.5);
-    particles.push({
-      x,y, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed-2.5,
-      life:1, decay:0.04+Math.random()*0.035,
-      size: isCrit?6+Math.random()*4:3+Math.random()*2.5,
-      color: isCrit
-        ? `hsl(${10+Math.random()*30},100%,55%)`
-        : `hsl(${30+Math.random()*30},95%,55%)`
-    });
+  const count = isCrit?22:9;
+  for (let i=0;i<count;i++) {
+    const angle = (Math.PI*2*i)/count+Math.random()*.6, speed=2+Math.random()*(isCrit?7:3.5);
+    particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-2.5,life:1,decay:.04+Math.random()*.035,size:isCrit?6+Math.random()*4:3+Math.random()*2.5,color:isCrit?`hsl(${10+Math.random()*30},100%,55%)`:`hsl(${30+Math.random()*30},95%,55%)`});
   }
 }
 function animateParticles() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  for (let i=particles.length-1; i>=0; i--) {
-    const p=particles[i];
-    p.x+=p.vx; p.y+=p.vy; p.vy+=0.18; p.life-=p.decay;
-    if (p.life<=0) { particles.splice(i,1); continue; }
+  for (let i=particles.length-1;i>=0;i--) {
+    const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=.18; p.life-=p.decay;
+    if (p.life<=0){particles.splice(i,1);continue;}
     ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
     ctx.beginPath(); ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2); ctx.fill();
   }
-  ctx.globalAlpha=1;
-  requestAnimationFrame(animateParticles);
+  ctx.globalAlpha=1; requestAnimationFrame(animateParticles);
 }
 animateParticles();
 
-// ═══════════════════════════════════════
-//   UI
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  RENDER UI
+// ════════════════════════════════════════════
 function updateUI() {
+  const maxEnergy = getEffectiveMaxEnergy();
+  state.maxEnergy = maxEnergy;
+
   document.getElementById('coins-display').textContent = fmt(state.coins);
   document.getElementById('total-display').textContent = fmt(state.totalEarned);
-  document.getElementById('per-tap').textContent = '+'+fmt(state.tapPower);
+  document.getElementById('per-tap').textContent = '+'+fmt(getEffectiveTapPower());
   document.getElementById('level-num').textContent = getLevel();
   const rank = getRank();
   document.getElementById('rank-name').textContent = rank.name;
   document.getElementById('rank-pill').textContent = rank.name;
   const pct = ((state.totalEarned-rank.min)/(rank.max-rank.min))*100;
   document.getElementById('rank-progress').style.width = Math.min(100,pct)+'%';
-  const ePct = (state.energy/state.maxEnergy)*100;
-  document.getElementById('hunger-fill').style.width = ePct+'%';
-  document.getElementById('hunger-text').textContent = `${state.energy} / ${state.maxEnergy}`;
+  const ePct = (state.energy/maxEnergy)*100;
+  document.getElementById('hunger-fill').style.width = Math.min(100,ePct)+'%';
+  document.getElementById('hunger-text').textContent = `${Math.floor(state.energy)} / ${maxEnergy}`;
+  // Рецепт на кнопке и баннере
+  const activeRec = RECIPES_CONFIG.find(r=>r.id===state.activeRecipe);
+  if (activeRec) {
+    document.getElementById('doner-icon').textContent = activeRec.emoji;
+    document.getElementById('doner-recipe-label').textContent = activeRec.name.toUpperCase();
+    document.getElementById('rb-icon').textContent = activeRec.emoji;
+    document.getElementById('rb-name').textContent = activeRec.name;
+    document.getElementById('rb-bonus').textContent = activeRec.bonuses.join(' · ');
+  }
   renderUpgrades();
   renderTasks();
 }
 
-// ═══════════════════════════════════════
-//   UPGRADES
-// ═══════════════════════════════════════
 function renderUpgrades() {
   const grid = document.getElementById('upgrade-grid');
   grid.innerHTML = '';
-  UPGRADES_CONFIG.forEach(cfg => {
-    const lv = state.upgrades[cfg.id]||0;
-    const isMax = lv>=cfg.maxLevel;
-    const cost = getUpgCost(cfg,lv);
-    const canAfford = state.coins>=cost;
+  const level = getLevel();
+  // Базовые
+  const baseLbl = document.createElement('div'); baseLbl.className='upgrade-section-label'; baseLbl.textContent='🍴 Базовая кухня'; grid.appendChild(baseLbl);
+  UPGRADES_CONFIG.filter(u=>u.cat==='base').forEach(cfg => renderUpgradeCard(cfg, grid, level));
+  // Профи (показываем всегда но с замком)
+  const proLbl = document.createElement('div'); proLbl.className='upgrade-section-label'; proLbl.textContent='⭐ Профессиональное оборудование'; grid.appendChild(proLbl);
+  UPGRADES_CONFIG.filter(u=>u.cat==='pro').forEach(cfg => renderUpgradeCard(cfg, grid, level));
+}
+
+function renderUpgradeCard(cfg, grid, level) {
+  const lv = state.upgrades[cfg.id]||0;
+  const isMax = lv >= cfg.maxLevel;
+  const isLocked = cfg.unlockLevel && level < cfg.unlockLevel;
+  const cost = getUpgCost(cfg, lv);
+  const canAfford = state.coins >= cost;
+  const card = document.createElement('div');
+  card.className = 'upgrade-card '+(isLocked?'locked':isMax?'maxed':canAfford?'affordable':'cant-afford');
+  const discount = isDiscountActive() ? ` <small style="color:var(--green);font-size:10px">-${Math.floor(state.effects.discount*100)}%</small>` : '';
+  card.innerHTML = `
+    <div class="upgrade-icon">${cfg.icon}</div>
+    <div class="upgrade-info">
+      <div class="upgrade-name">${cfg.name}${isLocked?` 🔒`:''}${isMax?' ✓':''}</div>
+      <div class="upgrade-desc">${isLocked?`Открывается на уровне шефа ${cfg.unlockLevel}`:cfg.desc}</div>
+      <div class="upgrade-level">Ур. ${lv} / ${cfg.maxLevel}</div>
+    </div>
+    <div class="upgrade-cost">
+      ${isMax ? '<span style="color:var(--green);font-size:13px">МАКС</span>' : isLocked ? '<span style="color:var(--muted);font-size:13px">🔒</span>' : `${fmt(cost)}${discount}<small>лир</small>`}
+    </div>
+  `;
+  if (!isMax && !isLocked) card.onclick = () => buyUpgrade(cfg.id);
+  grid.appendChild(card);
+}
+
+function renderRecipes() {
+  const tree = document.getElementById('recipe-tree');
+  tree.innerHTML = '';
+
+  // Дерево-путь
+  const pathDiv = document.createElement('div'); pathDiv.className = 'recipe-path';
+  RECIPES_CONFIG.forEach((recipe, idx) => {
+    const isUnlocked = state.unlockedRecipes.includes(recipe.id);
+    const isActive   = state.activeRecipe === recipe.id;
+    const canUnlock  = state.totalEarned >= recipe.unlockAt;
+    const node = document.createElement('div'); node.className='recipe-node';
+    const dot  = document.createElement('div');
+    dot.className = 'recipe-dot ' + (isActive ? 'active' : isUnlocked ? 'unlocked' : 'locked-node');
+    dot.textContent = recipe.emoji;
+    dot.onclick = () => { const card = document.getElementById('recipe-card-'+recipe.id); if (card) card.scrollIntoView({behavior:'smooth',block:'nearest'}); };
+    const lbl = document.createElement('div'); lbl.className='recipe-dot-label'; lbl.textContent=recipe.name;
+    node.appendChild(dot); node.appendChild(lbl);
+    pathDiv.appendChild(node);
+    if (idx < RECIPES_CONFIG.length-1) {
+      const conn = document.createElement('div');
+      conn.className = 'recipe-connector '+(isUnlocked&&RECIPES_CONFIG[idx+1]&&state.unlockedRecipes.includes(RECIPES_CONFIG[idx+1].id)?'lit':'');
+      pathDiv.appendChild(conn);
+    }
+  });
+  tree.appendChild(pathDiv);
+
+  // Карточки
+  RECIPES_CONFIG.forEach(recipe => {
+    const isUnlocked = state.unlockedRecipes.includes(recipe.id);
+    const isActive   = state.activeRecipe === recipe.id;
+    const canUnlock  = state.totalEarned >= recipe.unlockAt;
+
     const card = document.createElement('div');
-    card.className = 'upgrade-card '+(isMax?'maxed':canAfford?'affordable':'cant-afford');
+    card.className = 'recipe-card'+(isActive?' active-recipe':'');
+    card.id = 'recipe-card-'+recipe.id;
+
+    const bonusPills = recipe.bonuses.map(b=>`<span class="recipe-bonus-pill${isActive?' active-pill':''}">${b}</span>`).join('');
+
+    let btnHtml = '';
+    if (isActive) {
+      btnHtml = `<button class="recipe-action-btn active-btn">✓ АКТИВНЫЙ РЕЦЕПТ</button>`;
+    } else if (isUnlocked) {
+      btnHtml = `<button class="recipe-action-btn use-btn" onclick="activateRecipe('${recipe.id}')">🥙 ГОТОВИТЬ ПО ЭТОМУ РЕЦЕПТУ</button>`;
+    } else if (recipe.cost === 0) {
+      btnHtml = `<button class="recipe-action-btn active-btn">✓ БАЗОВЫЙ</button>`;
+    } else if (!canUnlock) {
+      btnHtml = `<button class="recipe-action-btn locked-btn">🔒 Нужно заработать ${fmt(recipe.unlockAt)} лир</button>`;
+    } else {
+      btnHtml = `<button class="recipe-action-btn buy-btn" onclick="buyRecipe('${recipe.id}')">🔓 КУПИТЬ ЗА ${fmt(recipe.cost)} ₺</button>`;
+    }
+
     card.innerHTML = `
-      <div class="upgrade-icon">${cfg.icon}</div>
-      <div class="upgrade-info">
-        <div class="upgrade-name">${cfg.name}</div>
-        <div class="upgrade-desc">${cfg.desc}</div>
-        <div class="upgrade-level">Уровень ${lv} / ${cfg.maxLevel}</div>
+      <div class="recipe-card-header">
+        <div class="recipe-card-icon">${recipe.emoji}</div>
+        <div class="recipe-card-title">
+          <div class="recipe-card-name">${recipe.name}${isActive?' 🔥':isUnlocked?' ✓':''}</div>
+          <div class="recipe-card-sub">${recipe.desc}</div>
+        </div>
       </div>
-      <div class="upgrade-cost">
-        ${isMax
-          ? '<span class="maxed-label">✓ ГОТОВО</span>'
-          : `${fmt(cost)}<small>лир</small>`}
-      </div>
+      <div class="recipe-bonuses">${bonusPills}</div>
+      ${btnHtml}
     `;
-    if (!isMax) card.onclick = ()=>buyUpgrade(cfg.id);
-    grid.appendChild(card);
+    tree.appendChild(card);
   });
 }
 
-function buyUpgrade(id) {
-  const cfg = UPGRADES_CONFIG.find(u=>u.id===id);
-  const lv  = state.upgrades[id]||0;
-  if (lv>=cfg.maxLevel) return;
-  const cost = getUpgCost(cfg,lv);
-  if (state.coins<cost) { showToast('💸 Мало лир! Нарезай больше!'); return; }
-  state.coins -= cost;
-  state.upgrades[id] = lv+1;
-  if      (cfg.effect==='tap')       state.tapPower+=cfg.value;
-  else if (cfg.effect==='maxEnergy') state.maxEnergy+=cfg.value;
-  else if (cfg.effect==='regen')     state.regenRate+=cfg.value;
-  else if (cfg.effect==='crit')      state.critChance=Math.min(0.5,state.critChance+0.08);
-  else if (cfg.effect==='auto')      state.autoLevel+=1;
-  else if (cfg.effect==='combo')     state.comboMult+=cfg.value;
-  state.tasks.upgrade3=(state.tasks.upgrade3||0)+1;
-  tg?.HapticFeedback?.notificationOccurred('success');
-  showToast(`✅ ${cfg.name} улучшен до ур. ${lv+1}!`);
-  saveState(); updateUI();
+function renderBattlePass() {
+  const tasks = getBPTasks();
+  const currentDay = getBPDay();
+  const claimed = state.bp?.claimed || [];
+  const done = claimed.length;
+
+  document.getElementById('bp-current-day').textContent = currentDay;
+  document.getElementById('bp-done-count').textContent = done;
+  document.getElementById('bp-progress-fill').style.width = (done/30*100)+'%';
+
+  const grid = document.getElementById('bp-grid');
+  grid.innerHTML = '';
+
+  tasks.forEach(task => {
+    const isToday   = task.day === currentDay;
+    const isPast    = task.day < currentDay;
+    const isFuture  = task.day > currentDay;
+    const isClaimed = claimed.includes(task.day);
+    const prog      = isToday ? (state.bp?.progress?.[task.type]||0) : (isClaimed ? task.goal : 0);
+    const pct       = Math.min(100, (prog/task.goal)*100);
+    const canClaim  = isToday && prog >= task.goal && !isClaimed;
+
+    const div = document.createElement('div');
+    div.className = 'bp-task '+(isToday&&!isClaimed?'today':isClaimed?'completed':isFuture?'future':'');
+
+    div.innerHTML = `
+      <div class="bp-task-header">
+        <div class="bp-task-left">
+          <div class="bp-day-num ${isToday&&!isClaimed?'active-day':isClaimed?'done-day':''}">${task.day}</div>
+          <div>
+            <div class="bp-task-name">${task.icon} ${task.name}</div>
+            <div class="bp-task-sub">${getTaskTypeLabel(task.type)}: ${fmt(prog)} / ${fmt(task.goal)}</div>
+          </div>
+        </div>
+        <div class="bp-reward">+${fmt(task.reward)}₺</div>
+      </div>
+      <div class="bp-bar"><div class="bp-bar-fill" style="width:${pct}%"></div></div>
+    `;
+
+    if (isClaimed) {
+      const stamp = document.createElement('div'); stamp.className='bp-done-stamp'; stamp.textContent='✅'; div.appendChild(stamp);
+    } else if (canClaim) {
+      const btn = document.createElement('button'); btn.className='bp-claim-btn'; btn.textContent='ЗАБРАТЬ';
+      btn.onclick = () => claimBPReward(task.day); div.appendChild(btn);
+    }
+
+    grid.appendChild(div);
+  });
 }
 
-// ═══════════════════════════════════════
-//   TASKS
-// ═══════════════════════════════════════
+function getTaskTypeLabel(type) {
+  const map = {tap:'Тапов',earn:'Лир заработано',upgrade:'Улучшений куплено',recipe:'Рецептов открыто'};
+  return map[type]||type;
+}
+
+// === TASKS PANEL ===
 const TASKS_CONFIG = [
-  { id:'tap500',   name:'Нарежь 500 порций',      icon:'🔪', goal:500,   reward:500,  unit:'порций' },
-  { id:'earn10k',  name:'Заработай 10 000 лир',   icon:'💵', goal:10000, reward:1000, unit:'лир'    },
-  { id:'upgrade3', name:'Купи 3 улучшения кухни', icon:'🍳', goal:3,     reward:800,  unit:'апгр.'  },
+  {id:'tap500',   name:'Нарежь 500 порций',     icon:'🔪', goal:500,   reward:500,  unit:'порций'},
+  {id:'earn10k',  name:'Заработай 10 000 лир',  icon:'💵', goal:10000, reward:1000, unit:'лир'},
+  {id:'upgrade3', name:'Купи 3 улучшения кухни',icon:'🍳', goal:3,     reward:800,  unit:'апгр.'},
 ];
 
 function renderTasks() {
-  const c = document.getElementById('tasks-list');
-  c.innerHTML='';
+  const c = document.getElementById('tasks-list'); c.innerHTML='';
   TASKS_CONFIG.forEach(task=>{
     const prog=Math.min(task.goal, state.tasks[task.id]||0);
     const done=prog>=task.goal;
-    const div=document.createElement('div');
-    div.className='challenge-card';
+    const div=document.createElement('div'); div.className='challenge-card';
     div.innerHTML=`
       ${done?'<div class="task-done-stamp">✅</div>':''}
-      <div class="challenge-header">
-        <div class="challenge-name">${task.icon} ${task.name}</div>
-        <div class="challenge-reward">+${fmt(task.reward)} ₺</div>
-      </div>
+      <div class="challenge-header"><div class="challenge-name">${task.icon} ${task.name}</div><div class="challenge-reward">+${fmt(task.reward)} ₺</div></div>
       <div class="challenge-progress">${fmt(prog)} / ${fmt(task.goal)} ${task.unit}</div>
       <div class="ch-bar"><div class="ch-fill" style="width:${(prog/task.goal)*100}%"></div></div>
     `;
-    if (done) div.style.borderColor='rgba(124,179,66,0.4)';
+    if (done) div.style.borderColor='rgba(124,179,66,.4)';
     c.appendChild(div);
   });
 }
 
-// ═══════════════════════════════════════
-//   TABS
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════
 function switchTab(name) {
+  const tabs  = ['upgrades','recipes','battlepass','leaderboard','tasks'];
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  ['upgrades','leaderboard','tasks'].forEach((n,i)=>{
-    if(n===name) {
+  tabs.forEach((n,i)=>{
+    if(n===name){
       document.querySelectorAll('.tab')[i].classList.add('active');
       document.getElementById('panel-'+n).classList.add('active');
     }
   });
   if (name==='leaderboard') loadLeaderboard();
+  if (name==='recipes')     renderRecipes();
+  if (name==='battlepass')  renderBattlePass();
 }
 
-// ═══════════════════════════════════════
-//   TOAST
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════
 let toastTimer;
 function showToast(msg) {
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'), 2700);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2700);
 }
 
-// ═══════════════════════════════════════
-//   GAME LOOPS
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  LOOPS
+// ════════════════════════════════════════════
+// Регенерация энергии
 setInterval(()=>{
   if (!stateLoaded) return;
-  if (state.energy<state.maxEnergy) {
-    state.energy=Math.min(state.maxEnergy, state.energy+state.regenRate);
+  const maxE = getEffectiveMaxEnergy();
+  if (state.energy < maxE) {
+    state.energy = Math.min(maxE, state.energy + getEffectiveRegen());
     updateUI();
   }
-},1000);
+}, 1000);
 
+// Авто-нарезка
 setInterval(()=>{
-  if (!stateLoaded) return;
-  if (state.autoLevel>0 && state.energy>0) {
-    const earned=state.tapPower*state.autoLevel;
-    state.coins+=earned; state.totalEarned+=earned;
-    state.energy=Math.max(0,state.energy-state.autoLevel);
+  if (!stateLoaded || isFrozen()) return;
+  const autoLv = getEffectiveAutoLevel();
+  if (autoLv > 0 && state.energy > 0) {
+    const earned = getEffectiveTapPower() * autoLv * (isMultActive() ? (state.effects.mult||1) : 1);
+    state.coins += earned; state.totalEarned += earned;
+    state.energy = Math.max(0, state.energy - autoLv);
+    trackBPProgress('earn', earned);
     updateUI();
   }
-},1000);
+}, 1000);
 
-let lastLevel=1;
+// Проверка level up
+let lastLevel = 1;
 setInterval(()=>{
-  const newLv=getLevel();
-  if (newLv>lastLevel) {
-    lastLevel=newLv;
+  const newLv = getLevel();
+  if (newLv > lastLevel) {
+    lastLevel = newLv;
     tg?.HapticFeedback?.notificationOccurred('success');
-    showToast(`🎉 Ахмед доволен! Новый уровень шефа: ${newLv}`);
+    showToast(`🎉 Новый уровень шефа: ${newLv}! Новые апгрейды доступны!`);
+    renderUpgrades();
   }
-},2000);
+}, 2000);
 
-// Автосохранение каждые 8 секунд (не слишком часто для API)
+// Случайные события
+setInterval(tryTriggerEvent, 10000);
+
+// Автосохранение
 setInterval(saveState, 8000);
-
 window.addEventListener('beforeunload', saveState);
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveState(); });
 if (tg) tg.onEvent('viewportChanged', ()=>{ if(!tg.isExpanded) saveState(); });
 
-// ═══════════════════════════════════════
-//   INIT
-// ═══════════════════════════════════════
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
 async function init() {
   await loadState();
 
-  // Оффлайн-доходы
-  const offlineSec = (Date.now()-(state.lastSave||Date.now()))/1000;
-  state.energy = Math.min(state.maxEnergy, state.energy + Math.floor(offlineSec*state.regenRate));
-  if (offlineSec>5 && state.autoLevel>0) {
-    const oe = Math.floor(offlineSec*state.autoLevel*state.tapPower);
-    if (oe>0) {
-      state.coins+=oe; state.totalEarned+=oe;
+  // Оффлайн доход
+  const offlineSec = (Date.now() - (state.lastSave||Date.now())) / 1000;
+  const maxE = getEffectiveMaxEnergy();
+  state.energy = Math.min(maxE, state.energy + Math.floor(offlineSec * getEffectiveRegen()));
+  const autoLv = getEffectiveAutoLevel();
+  if (offlineSec > 5 && autoLv > 0) {
+    const oe = Math.floor(offlineSec * autoLv * getEffectiveTapPower());
+    if (oe > 0) {
+      state.coins += oe; state.totalEarned += oe;
       setTimeout(()=>showToast(`👨‍🍳 Мустафа нарезал: +${fmt(oe)} лир`), 1000);
     }
   }
 
   lastLevel = getLevel();
-
-  if (Date.now()-(state.lastDaily||0) < 24*3600*1000) {
-    document.getElementById('daily-banner').style.opacity='0.4';
+  if (Date.now() - (state.lastDaily||0) < 24*3600*1000) {
+    document.getElementById('daily-banner').style.opacity = '0.4';
   }
+  if (!state.bp) state.bp = defaultState().bp;
 
   updateUI();
   saveState();
